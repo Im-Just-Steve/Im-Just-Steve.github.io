@@ -17,3 +17,18 @@
 .custom-range input{background:#0a1019;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px 10px}
 .stats-range-label{color:var(--muted);font-size:12px;margin:0 0 10px}
 @media(max-width:700px){.custom-range{flex-direction:column}.custom-range input{width:100%}}
+
+/* iPad/Safari form sizing */
+.form-grid label input,
+.form-grid label select{
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
+.form-grid label input[type="date"],
+.form-grid label input[type="time"]{
+  min-width:0;
+  width:100%;
+  max-width:100%;
+}

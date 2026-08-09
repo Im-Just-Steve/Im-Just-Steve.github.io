@@ -42,3 +42,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Aggregate flight-time statistics sum each flight's displayed 0.1-hour value, matching the individual logbook entries.
 
 - Statistics date filters: All time, Previous 90 days, and Custom date range.
+
+- Improved iPad/Safari form sizing for date and time fields.
