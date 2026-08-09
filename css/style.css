@@ -35,3 +35,34 @@
 
 .update-status{font-size:12px;color:var(--muted);margin:9px 0 0;min-height:18px}
 #updateBtn:disabled{opacity:.6;cursor:wait}
+
+/* iPad/Safari native date & time controls */
+.form-grid{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+}
+.form-grid label{
+  min-width:0;
+  overflow:visible;
+}
+.form-grid label input,
+.form-grid label select{
+  display:block;
+  min-width:0;
+  width:100%;
+  max-width:100%;
+}
+.form-grid label input[type="date"],
+.form-grid label input[type="time"]{
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  min-inline-size:0;
+  font-size:16px;
+  padding-left:10px;
+  padding-right:6px;
+}
+@media(max-width:700px){
+  .form-grid{
+    grid-template-columns:minmax(0,1fr);
+  }
+}

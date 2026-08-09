@@ -46,3 +46,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Improved iPad/Safari form sizing for date and time fields.
 
 - In-app Check for updates button that updates the service worker without clearing IndexedDB flight data.
+
+- Further iPad/Safari date and time field sizing fixes using shrinkable grid tracks and native-control constraints.
