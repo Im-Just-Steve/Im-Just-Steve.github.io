@@ -1,0 +1,215 @@
+const $=s=>document.querySelector(s);
+let flights=[];
+let deferredInstall=null;
+
+document.addEventListener("DOMContentLoaded", async ()=>{
+  bindNavigation();
+  bindDialog();
+  $("#search").addEventListener("input",renderLogbook);
+  $("#yearFilter").addEventListener("change",renderLogbook);
+  document.querySelectorAll("[data-stats-range]").forEach(b=>b.addEventListener("click",()=>{
+    document.querySelectorAll("[data-stats-range]").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    $("#customRange").classList.toggle("hidden",b.dataset.statsRange!=="custom");
+    renderStatistics();
+  }));
+  $("#statsFrom").addEventListener("change",renderStatistics);
+  $("#statsTo").addEventListener("change",renderStatistics);
+  $("#exportBtn").addEventListener("click",exportData);
+  $("#importInput").addEventListener("change",importData);
+  $("#clearBtn").addEventListener("click",clearData);
+  await refresh();
+  if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+});
+
+function bindNavigation(){
+  document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>{
+    const id=b.dataset.nav;
+    document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
+    document.querySelectorAll(".bottom-nav button").forEach(x=>x.classList.toggle("active",x.dataset.nav===id));
+    if(id==="statistics") renderStatistics();
+    if(id==="logbook") renderLogbook();
+  }));
+  document.querySelectorAll("[data-action='new-flight']").forEach(b=>b.addEventListener("click",()=>openDialog()));
+}
+
+function bindDialog(){
+  $("#closeDialog").onclick=()=>$("#flightDialog").close();
+  $("#cancelDialog").onclick=()=>$("#flightDialog").close();
+  $("#deleteFlight").onclick=async()=>{
+    const id=$("#flightId").value;
+    if(id && confirm("Delete this flight?")){await deleteFlight(id);$("#flightDialog").close();await refresh();toast("Flight deleted");}
+  };
+  $("#flightForm").addEventListener("submit",async e=>{
+    e.preventDefault();
+    const id=$("#flightId").value || crypto.randomUUID();
+    const flight={
+      id,date:$("#date").value,registration:$("#registration").value.trim().toUpperCase(),
+      aircraft:$("#aircraft").value.trim().toUpperCase(),departure:$("#departure").value.trim().toUpperCase(),
+      arrival:$("#arrival").value.trim().toUpperCase(),departTime:$("#departTime").value, arrivalTime:$("#arrivalTime").value,
+      blockMinutes:calculateDuration($("#departTime").value,$("#arrivalTime").value),
+      role:$("#role").value,flightType:$("#flightType").value,nightMinutes:num("nightMinutes"),
+      instrumentMinutes:num("instrumentMinutes"),takeoffs:num("takeoffs"),landings:num("landings"),remarks:$("#remarks").value.trim()
+    };
+    await putFlight(flight);$("#flightDialog").close();await refresh();toast("Flight saved");
+  });
+}
+const num=id=>Math.max(0,Number($("#"+id).value)||0);
+
+function openDialog(f=null){
+  $("#dialogTitle").textContent=f?"Edit flight":"Log flight";
+  $("#flightId").value=f?.id||"";
+  $("#date").value=f?.date||new Date().toISOString().slice(0,10);
+  $("#registration").value=f?.registration||"";
+  $("#aircraft").value=f?.aircraft||"";
+  $("#departure").value=f?.departure||"";
+  $("#arrival").value=f?.arrival||"";
+  $("#departTime").value=f?.departTime||"09:00";
+  $("#arrivalTime").value=f?.arrivalTime||"10:00";
+  $("#role").value=f?.role||"PIC";
+  $("#flightType").value=f?.flightType||"VFR";
+  $("#nightMinutes").value=f?.nightMinutes??0;
+  $("#instrumentMinutes").value=f?.instrumentMinutes??0;
+  $("#takeoffs").value=f?.takeoffs??1;
+  $("#landings").value=f?.landings??1;
+  $("#remarks").value=f?.remarks||"";
+  $("#deleteFlight").classList.toggle("hidden",!f);
+  $("#flightDialog").showModal();
+}
+
+async function refresh(){
+  flights=await getAllFlights();
+  renderStats();renderRecent();renderLogbook();renderStatistics();populateYears();
+}
+function calculateDuration(depart, arrival){
+  if(!depart || !arrival) return 0;
+  const [dh,dm]=depart.split(":").map(Number), [ah,am]=arrival.split(":").map(Number);
+  let start=dh*60+dm, end=ah*60+am;
+  if(end<start) end+=24*60; // supports flights crossing midnight
+  return end-start;
+}
+function hours(min){return (Math.round((min/60)*10)/10).toFixed(1)}
+function entryHours(min){return Math.round((min/60)*10)/10}
+function sumRoundedHours(list, field="blockMinutes"){
+  return list.reduce((sum,f)=>sum+entryHours(Number(f[field])||0),0);
+}
+function displayHours(value){return value.toFixed(1)}
+function total(field){return flights.reduce((s,f)=>s+(Number(f[field])||0),0)}
+function renderStats(){
+  const totalRounded=sumRoundedHours(flights), picRounded=sumRoundedHours(flights.filter(f=>f.role==="P.1" || f.role==="P.1/S"));
+  const totalMin=total("blockMinutes"), pic=flights.filter(f=>f.role==="P.1" || f.role==="P.1/S").reduce((s,f)=>s+f.blockMinutes,0);
+  $("#stats").innerHTML=[
+    ["Total time",displayHours(totalRounded)+" h"],["PIC",displayHours(picRounded)+" h"],["Night",displayHours(sumRoundedHours(flights,"nightMinutes"))+" h"],["Take-offs",total("takeoffs")],["Landings",total("landings")]
+  ].map(x=>`<div class="stat"><strong>${x[1]}</strong><span>${x[0]}</span></div>`).join("");
+}
+function flightHTML(f){
+  return `<article class="flight" data-id="${f.id}">
+    <div class="flight-date">${formatDate(f.date)}</div>
+    <div><div class="route">${f.departure} → ${f.arrival}</div><div class="flight-meta">${f.registration} · ${f.aircraft} · ${f.role} · ${f.flightType}${f.remarks?" · "+escapeHTML(f.remarks):""}</div></div>
+    <div class="flight-time">${hours(f.blockMinutes)} h<small>${f.departTime||"--:--"}–${f.arrivalTime||"--:--"} GMT</small></div>
+  </article>`;
+}
+function attachFlightClicks(){
+  document.querySelectorAll(".flight").forEach(el=>el.onclick=()=>openDialog(flights.find(f=>f.id===el.dataset.id)));
+}
+function renderRecent(){
+  const data=flights.slice(0,6);
+  $("#recentFlights").innerHTML=data.length?data.map(flightHTML).join(""):`<div class="empty">No flights yet. Tap “Log flight” to start.</div>`;
+  attachFlightClicks();
+}
+function renderLogbook(){
+  const q=($("#search")?.value||"").toLowerCase(), y=$("#yearFilter")?.value||"";
+  const data=flights.filter(f=>(!y||f.date.startsWith(y)) && (!q||[f.registration,f.aircraft,f.departure,f.arrival,f.remarks,f.flightType].join(" ").toLowerCase().includes(q)));
+  $("#allFlights").innerHTML=data.length?data.map(flightHTML).join(""):`<div class="empty">No matching flights.</div>`;
+  attachFlightClicks();
+}
+function populateYears(){
+  const years=[...new Set(flights.map(f=>f.date.slice(0,4)))].sort().reverse();
+  const old=$("#yearFilter").value;
+  $("#yearFilter").innerHTML='<option value="">All years</option>'+years.map(y=>`<option>${y}</option>`).join("");
+  $("#yearFilter").value=years.includes(old)?old:"";
+}
+function renderStatistics(){
+  const active=$("#statistics .filter-btn.active")?.dataset.statsRange || "all";
+  let data=flights;
+  let rangeLabel="All time";
+
+  if(active==="90"){
+    const endDate=new Date();
+    endDate.setHours(23,59,59,999);
+    const startDate=new Date(endDate);
+    startDate.setDate(startDate.getDate()-89);
+    const from=startDate.toISOString().slice(0,10);
+    const to=endDate.toISOString().slice(0,10);
+    data=flights.filter(f=>f.date>=from && f.date<=to);
+    rangeLabel=`${formatDate(from)} – ${formatDate(to)}`;
+  }else if(active==="custom"){
+    const from=$("#statsFrom").value;
+    const to=$("#statsTo").value;
+    if(from && to){
+      data=flights.filter(f=>f.date>=from && f.date<=to);
+      rangeLabel=`${formatDate(from)} – ${formatDate(to)}`;
+    }else{
+      data=[];
+      rangeLabel="Choose a start and end date";
+    }
+  }
+
+  const byAircraft={};
+  data.forEach(f=>byAircraft[f.aircraft]=(byAircraft[f.aircraft]||0)+entryHours(f.blockMinutes));
+  const entries=Object.entries(byAircraft).sort((a,b)=>b[1]-a[1]);
+  const max=entries[0]?.[1]||1;
+  const totalTime=sumRoundedHours(data);
+  const picTime=sumRoundedHours(data.filter(f=>f.role==="P.1" || f.role==="P.1/S"));
+  const nightTime=sumRoundedHours(data,"nightMinutes");
+  const instrumentTime=sumRoundedHours(data,"instrumentMinutes");
+  const takeoffs=total("takeoffs"); // overwritten below for filtered set
+  const filteredTakeoffs=data.reduce((s,f)=>s+(Number(f.takeoffs)||0),0);
+  const filteredLandings=data.reduce((s,f)=>s+(Number(f.landings)||0),0);
+
+  $("#statisticsContent").innerHTML=`
+    <div class="stats-range-label">${escapeHTML(rangeLabel)} · ${data.length} flight${data.length===1?"":"s"}</div>
+    <div class="stats-grid">
+      <div class="stat"><strong>${displayHours(totalTime)} h</strong><span>Total time</span></div>
+      <div class="stat"><strong>${displayHours(picTime)} h</strong><span>P.1 / P.1/S</span></div>
+      <div class="stat"><strong>${displayHours(nightTime)} h</strong><span>Night</span></div>
+      <div class="stat"><strong>${filteredTakeoffs}</strong><span>Take-offs</span></div>
+      <div class="stat"><strong>${filteredLandings}</strong><span>Landings</span></div>
+    </div>
+    <div class="panel" style="margin-bottom:14px"><div class="panel-head"><h3>By aircraft</h3></div><div class="bars">
+      ${entries.length?entries.map(([k,v])=>`<div class="bar-row"><strong>${escapeHTML(k)}</strong><div class="bar"><i style="width:${Math.max(2,v/max*100)}%"></i></div><span>${displayHours(v)} h</span></div>`).join(""):`<div class="empty">No flights in this period.</div>`}
+    </div></div>
+    <div class="panel"><table class="stat-table">
+      <tr><td>Flights</td><td>${data.length}</td></tr>
+      <tr><td>Total time</td><td>${displayHours(totalTime)} h</td></tr>
+      <tr><td>P.1 / P.1/S time</td><td>${displayHours(picTime)} h</td></tr>
+      <tr><td>Night time</td><td>${displayHours(nightTime)} h</td></tr>
+      <tr><td>Instrument time</td><td>${displayHours(instrumentTime)} h</td></tr>
+      <tr><td>Take-offs</td><td>${filteredTakeoffs}</td></tr>
+      <tr><td>Landings</td><td>${filteredLandings}</td></tr>
+    </table></div>`;
+}
+function formatDate(s){return new Date(s+"T12:00:00").toLocaleDateString(undefined,{day:"2-digit",month:"short",year:"numeric"})}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800)}
+
+async function exportData(){
+  const blob=new Blob([JSON.stringify({app:"SkyLog",version:1,exportedAt:new Date().toISOString(),flights},null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`skylog-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);
+}
+async function importData(e){
+  const file=e.target.files[0];if(!file)return;
+  try{
+    const data=JSON.parse(await file.text()), list=Array.isArray(data)?data:data.flights;
+    if(!Array.isArray(list)) throw Error();
+    for(const f of list){ if(f.id) await putFlight(f); }
+    await refresh();toast(`${list.length} flights imported`);
+  }catch{alert("That file is not a valid SkyLog backup.")}
+  e.target.value="";
+}
+async function clearData(){
+  if(confirm("Delete every flight from this device? This cannot be undone.")){await clearFlights();await refresh();toast("Logbook cleared")}
+}
+
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e;$("#installBtn").classList.remove("hidden")});
+$("#installBtn")?.addEventListener("click",async()=>{if(!deferredInstall)return;deferredInstall.prompt();deferredInstall=null});
