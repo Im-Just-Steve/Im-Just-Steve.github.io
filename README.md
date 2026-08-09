@@ -44,3 +44,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Statistics date filters: All time, Previous 90 days, and Custom date range.
 
 - Improved iPad/Safari form sizing for date and time fields.
+
+- In-app Check for updates button that updates the service worker without clearing IndexedDB flight data.

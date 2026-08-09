@@ -1,6 +1,7 @@
 const $=s=>document.querySelector(s);
 let flights=[];
 let deferredInstall=null;
+let refreshing=false;
 
 document.addEventListener("DOMContentLoaded", async ()=>{
   bindNavigation();
@@ -18,8 +19,16 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   $("#exportBtn").addEventListener("click",exportData);
   $("#importInput").addEventListener("change",importData);
   $("#clearBtn").addEventListener("click",clearData);
+  $("#updateBtn").addEventListener("click",checkForUpdate);
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.addEventListener("controllerchange",()=>{
+      if(refreshing) window.location.reload();
+    });
+  }
   await refresh();
-  if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("sw.js").then(reg=>window.skylogRegistration=reg).catch(()=>{});
+  }
 });
 
 function bindNavigation(){
@@ -209,6 +218,42 @@ async function importData(e){
 }
 async function clearData(){
   if(confirm("Delete every flight from this device? This cannot be undone.")){await clearFlights();await refresh();toast("Logbook cleared")}
+}
+
+
+async function checkForUpdate(){
+  const btn=$("#updateBtn"), status=$("#updateStatus");
+  if(!("serviceWorker" in navigator)){
+    status.textContent="Updates are not supported by this browser.";
+    return;
+  }
+  btn.disabled=true;
+  status.textContent="Checking for updates…";
+  try{
+    const reg=window.skylogRegistration || await navigator.serviceWorker.getRegistration();
+    if(!reg) throw new Error("No service worker registration found.");
+    window.skylogRegistration=reg;
+    await reg.update();
+
+    if(reg.waiting){
+      status.textContent="Update found. Installing…";
+      reg.waiting.postMessage({type:"SKIP_WAITING"});
+      setTimeout(()=>{
+        if(!refreshing){
+          status.textContent="Update is ready. Reloading…";
+          refreshing=true;
+          window.location.reload();
+        }
+      },500);
+    }else{
+      status.textContent="You're already using the latest version.";
+      btn.disabled=false;
+    }
+  }catch(err){
+    console.error(err);
+    status.textContent="Could not check for an update. Please try again.";
+    btn.disabled=false;
+  }
 }
 
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e;$("#installBtn").classList.remove("hidden")});

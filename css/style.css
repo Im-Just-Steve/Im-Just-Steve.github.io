@@ -32,3 +32,6 @@
   width:100%;
   max-width:100%;
 }
+
+.update-status{font-size:12px;color:var(--muted);margin:9px 0 0;min-height:18px}
+#updateBtn:disabled{opacity:.6;cursor:wait}
