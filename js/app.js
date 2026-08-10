@@ -43,14 +43,16 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   }
 });
 
+function showView(id){
+  const target=document.getElementById(id);
+  if(!target) return;
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
+  document.querySelectorAll(".bottom-nav button").forEach(x=>x.classList.toggle("active",x.dataset.nav===id));
+  if(id==="statistics") renderStatistics();
+  if(id==="logbook") renderLogbook();
+}
 function bindNavigation(){
-  document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>{
-    const id=b.dataset.nav;
-    document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
-    document.querySelectorAll(".bottom-nav button").forEach(x=>x.classList.toggle("active",x.dataset.nav===id));
-    if(id==="statistics") renderStatistics();
-    if(id==="logbook") renderLogbook();
-  }));
+  document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.nav)));
   document.querySelectorAll("[data-action='new-flight']").forEach(b=>b.addEventListener("click",()=>openDialog()));
 }
 

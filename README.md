@@ -64,3 +64,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Aircraft Classes moved to a dedicated page accessible from Settings.
 
 - Settings renamed and simplified; Aircraft Classes and Data & Backup now open on dedicated pages.
+
+- Fixed dedicated Settings sub-page navigation for Aircraft Classes and Data & Backup.
