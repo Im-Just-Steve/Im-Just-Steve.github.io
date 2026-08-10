@@ -60,3 +60,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Aircraft Classes settings: create, rename, delete classes and add/remove aircraft types within each class.
 
 - Fixed IndexedDB upgrade so Aircraft Classes are available to existing installations without deleting flight data.
+
+- Aircraft Classes moved to a dedicated page accessible from Settings.
