@@ -58,3 +58,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - New flight date and time fields start blank and show DD/MM/YYYY and HH:MM placeholders; existing flights still populate their saved values when edited.
 
 - Aircraft Classes settings: create, rename, delete classes and add/remove aircraft types within each class.
+
+- Fixed IndexedDB upgrade so Aircraft Classes are available to existing installations without deleting flight data.

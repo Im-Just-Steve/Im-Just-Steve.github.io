@@ -5,12 +5,15 @@ let dbPromise;
 function openDB(){
   if(dbPromise) return dbPromise;
   dbPromise = new Promise((resolve,reject)=>{
-    const req = indexedDB.open(DB_NAME,1);
+    const req = indexedDB.open(DB_NAME,2);
     req.onupgradeneeded = () => {
       const db=req.result;
       if(!db.objectStoreNames.contains(STORE)){
         const store=db.createObjectStore(STORE,{keyPath:"id"});
         store.createIndex("date","date");
+      }
+      if(!db.objectStoreNames.contains("aircraftClasses")){
+        db.createObjectStore("aircraftClasses",{keyPath:"id"});
       }
     };
     req.onsuccess=()=>resolve(req.result);

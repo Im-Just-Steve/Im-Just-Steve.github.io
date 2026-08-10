@@ -246,7 +246,12 @@ function escapeHtml(value){
   return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
 async function loadAircraftClasses(){
-  aircraftClasses=await getAircraftClasses();
+  try{
+    aircraftClasses=await getAircraftClasses();
+  }catch(err){
+    console.error("Could not load aircraft classes",err);
+    aircraftClasses=[];
+  }
   aircraftClasses.sort((a,b)=>a.name.localeCompare(b.name));
   renderAircraftClasses();
 }
