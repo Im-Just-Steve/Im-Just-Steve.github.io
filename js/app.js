@@ -27,7 +27,14 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   $("#newClassName")?.addEventListener("keydown",e=>{if(e.key==="Enter")addAircraftClass();});
   document.addEventListener("click",e=>{
     const nav=e.target.closest("[data-view]");
-    if(nav){e.preventDefault();showView(nav.dataset.view);}
+    if(nav){
+      e.preventDefault();
+      if(nav.dataset.view==="statistics"){
+        await loadAircraftClasses();
+        statsSelectedItem=null;
+      }
+      showView(nav.dataset.view);
+    }
     const item=e.target.closest("[data-stats-item]");
     if(item){statsSelectedItem=item.dataset.statsItem;renderStatistics();}
   });
