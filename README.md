@@ -77,3 +77,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Aircraft Classes create controls matched to the class controls; empty class list no longer displays placeholder text.
 
 - Added clear horizontal inset to the Aircraft Classes intro and create-class controls inside the panel.
+
+- Matched the Aircraft Classes create row vertical spacing to the horizontal inset.

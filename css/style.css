@@ -127,3 +127,9 @@
   margin-left:12px;
   margin-right:12px;
 }
+
+/* Match the vertical inset of the Aircraft Classes create row to its horizontal inset */
+#aircraftClasses > .panel > .class-manager > .class-create{
+  margin-top:12px;
+  margin-bottom:12px;
+}
