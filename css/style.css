@@ -157,3 +157,8 @@
 .stats-breakdown-table th{white-space:nowrap;font-size:11px}
 .stats-breakdown-table td,.stats-breakdown-table th{text-align:right}
 .stats-breakdown-table td:first-child,.stats-breakdown-table th:first-child{text-align:left}
+
+.stats-item-buttons{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.stats-item-btn{border:1px solid var(--border,#d9dee7);background:var(--surface,#fff);color:inherit;border-radius:999px;padding:9px 14px;font:inherit;cursor:pointer}
+.stats-item-btn.active{background:var(--accent,#2d6cdf);color:#fff;border-color:var(--accent,#2d6cdf)}
+.stats-grid .stat small{display:block;margin-top:4px;opacity:.7;font-size:11px}

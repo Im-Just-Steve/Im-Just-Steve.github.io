@@ -3,6 +3,7 @@ let flights=[];
 let deferredInstall=null;
 let refreshing=false;
 let aircraftClasses=[];
+let statsSelectedItem=null;
 
 document.addEventListener("DOMContentLoaded", async ()=>{
   bindNavigation();
@@ -18,6 +19,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   }));
   $("#statsFrom").addEventListener("change",renderStatistics);
   $("#statsTo").addEventListener("change",renderStatistics);
+  $("#statsBreakdown")?.addEventListener("change",()=>{statsSelectedItem=null;renderStatistics();});
   $("#statsBreakdown")?.addEventListener("change",renderStatistics);
   $("#exportBtn").addEventListener("click",exportData);
   $("#importInput").addEventListener("change",importData);
@@ -28,6 +30,8 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   document.addEventListener("click",e=>{
     const nav=e.target.closest("[data-view]");
     if(nav){e.preventDefault();showView(nav.dataset.view);}
+    const item=e.target.closest("[data-stats-item]");
+    if(item){statsSelectedItem=item.dataset.statsItem;renderStatistics();}
   });
 
   if("serviceWorker" in navigator){
@@ -231,17 +235,39 @@ function statsRowsTable(rows){
       <td>${r.landingsDay}</td><td>${r.landingsNight}</td><td>${r.landingsTotal}</td></tr>`).join("")}</tbody>
   </table></div>`;
 }
+function getDayNightCounts(f){
+  const t=Number(f.takeoffs)||0,l=Number(f.landings)||0;
+  const td=f.takeoffsDay!=null?Number(f.takeoffsDay):t;
+  const tn=f.takeoffsNight!=null?Number(f.takeoffsNight):0;
+  const ld=f.landingsDay!=null?Number(f.landingsDay):l;
+  const ln=f.landingsNight!=null?Number(f.landingsNight):0;
+  return {takeoffsDay:td,takeoffsNight:tn,takeoffsTotal:td+tn,landingsDay:ld,landingsNight:ln,landingsTotal:ld+ln};
+}
+function statsGroups(data,mode){
+  const groups={};
+  const typeToClass=new Map();
+  if(mode==="class") aircraftClasses.forEach(c=>(c.types||[]).forEach(t=>typeToClass.set(String(t).trim().toUpperCase(),c.name)));
+  data.forEach(f=>{
+    const type=String(f.aircraft||"").trim().toUpperCase();
+    const name=mode==="class"?(typeToClass.get(type)||"Unclassified"):(type||"Unknown");
+    (groups[name] ||= []).push(f);
+  });
+  return Object.entries(groups).map(([name,items])=>items.reduce((a,f)=>{
+    const n=getDayNightCounts(f);
+    a.hours+=entryHours(f.blockMinutes);
+    a.takeoffsDay+=n.takeoffsDay;a.takeoffsNight+=n.takeoffsNight;a.takeoffsTotal+=n.takeoffsTotal;
+    a.landingsDay+=n.landingsDay;a.landingsNight+=n.landingsNight;a.landingsTotal+=n.landingsTotal;
+    return a;
+  },{name,hours:0,takeoffsDay:0,takeoffsNight:0,takeoffsTotal:0,landingsDay:0,landingsNight:0,landingsTotal:0})).sort((a,b)=>b.hours-a.hours);
+}
 function renderStatistics(){
-  const active=$("#statistics .filter-btn.active")?.dataset.statsRange || "all";
-  let data=flights;
-  let rangeLabel="All time";
-
+  const active=$("#statistics .filter-btn.active")?.dataset.statsRange||"all";
+  let data=flights,rangeLabel="All time";
   if(active==="90"){
-    const endDate=new Date(); endDate.setHours(23,59,59,999);
-    const startDate=new Date(endDate); startDate.setDate(startDate.getDate()-89);
-    const from=startDate.toISOString().slice(0,10),to=endDate.toISOString().slice(0,10);
-    data=flights.filter(f=>f.date>=from&&f.date<=to);
-    rangeLabel=`${formatDate(from)} – ${formatDate(to)}`;
+    const end=new Date();end.setHours(23,59,59,999);
+    const start=new Date(end);start.setDate(start.getDate()-89);
+    const from=start.toISOString().slice(0,10),to=end.toISOString().slice(0,10);
+    data=flights.filter(f=>f.date>=from&&f.date<=to);rangeLabel=`${formatDate(from)} – ${formatDate(to)}`;
   }else if(active==="custom"){
     const from=$("#statsFrom").value,to=$("#statsTo").value;
     if(from&&to){data=flights.filter(f=>f.date>=from&&f.date<=to);rangeLabel=`${formatDate(from)} – ${formatDate(to)}`;}
@@ -252,29 +278,27 @@ function renderStatistics(){
   const picTime=sumRoundedHours(data.filter(f=>f.role==="P.1"||f.role==="P.1/S"));
   const nightTime=sumRoundedHours(data,"nightMinutes");
   const instrumentTime=sumRoundedHours(data,"instrumentMinutes");
-  const counts=data.reduce((a,f)=>{
-    const n=getDayNightCounts(f);
-    a.takeoffsDay+=n.takeoffsDay;a.takeoffsNight+=n.takeoffsNight;a.takeoffsTotal+=n.takeoffsTotal;
-    a.landingsDay+=n.landingsDay;a.landingsNight+=n.landingsNight;a.landingsTotal+=n.landingsTotal;
-    return a;
-  },{takeoffsDay:0,takeoffsNight:0,takeoffsTotal:0,landingsDay:0,landingsNight:0,landingsTotal:0});
+  const counts=data.reduce((a,f)=>{const n=getDayNightCounts(f);
+    a.td+=n.takeoffsDay;a.tn+=n.takeoffsNight;a.tt+=n.takeoffsTotal;
+    a.ld+=n.landingsDay;a.ln+=n.landingsNight;a.lt+=n.landingsTotal;return a;
+  },{td:0,tn:0,tt:0,ld:0,ln:0,lt:0});
 
   const mode=$("#statsBreakdown")?.value||"aircraft";
-  const rows=buildStatsRows(data,mode);
+  const groups=statsGroups(data,mode);
+  if(!statsSelectedItem||!groups.some(g=>g.name===statsSelectedItem)) statsSelectedItem=groups[0]?.name||null;
+  const selected=groups.find(g=>g.name===statsSelectedItem);
   const title=mode==="class"?"By Class":"By Aircraft";
 
   $("#statisticsContent").innerHTML=`
     <div class="stats-range-label">${escapeHTML(rangeLabel)} · ${data.length} flight${data.length===1?"":"s"}</div>
-    <div class="stats-grid">
-      <div class="stat"><strong>${displayHours(totalTime)} h</strong><span>Total time</span></div>
-      <div class="stat"><strong>${displayHours(picTime)} h</strong><span>P.1 / P.1/S</span></div>
-      <div class="stat"><strong>${displayHours(nightTime)} h</strong><span>Night</span></div>
-      <div class="stat"><strong>${counts.takeoffsTotal}</strong><span>Take-offs</span></div>
-      <div class="stat"><strong>${counts.landingsTotal}</strong><span>Landings</span></div>
+    <div class="stats-item-buttons" role="group" aria-label="${title}">
+      ${groups.length?groups.map(g=>`<button type="button" class="stats-item-btn ${g.name===statsSelectedItem?"active":""}" data-stats-item="${escapeHTML(g.name)}">${escapeHTML(g.name)}</button>`).join(""):'<span class="empty">No flights in this period.</span>'}
     </div>
-    <div class="panel stats-detail-panel">
-      <div class="panel-head"><h3>${title}</h3></div>
-      ${statsRowsTable(rows)}
+    <div class="stats-grid">
+      <div class="stat"><strong>${selected?displayHours(selected.hours):"0.0"} h</strong><span>Total time</span></div>
+      <div class="stat"><strong>${selected?selected.takeoffsTotal:0}</strong><span>Take-offs</span><small>Day ${selected?selected.takeoffsDay:0} · Night ${selected?selected.takeoffsNight:0}</small></div>
+      <div class="stat"><strong>${selected?selected.landingsTotal:0}</strong><span>Landings</span><small>Day ${selected?selected.landingsDay:0} · Night ${selected?selected.landingsNight:0}</small></div>
+      <div class="stat"><strong>${selected?displayHours(selected.hours):"0.0"} h</strong><span>Hours</span></div>
     </div>
     <div class="panel"><table class="stat-table">
       <tr><td>Flights</td><td>${data.length}</td></tr>
@@ -282,12 +306,12 @@ function renderStatistics(){
       <tr><td>P.1 / P.1/S time</td><td>${displayHours(picTime)} h</td></tr>
       <tr><td>Night time</td><td>${displayHours(nightTime)} h</td></tr>
       <tr><td>Instrument time</td><td>${displayHours(instrumentTime)} h</td></tr>
-      <tr><td>Take-offs — Day</td><td>${counts.takeoffsDay}</td></tr>
-      <tr><td>Take-offs — Night</td><td>${counts.takeoffsNight}</td></tr>
-      <tr><td>Take-offs — Total</td><td>${counts.takeoffsTotal}</td></tr>
-      <tr><td>Landings — Day</td><td>${counts.landingsDay}</td></tr>
-      <tr><td>Landings — Night</td><td>${counts.landingsNight}</td></tr>
-      <tr><td>Landings — Total</td><td>${counts.landingsTotal}</td></tr>
+      <tr><td>Take-offs — Day</td><td>${counts.td}</td></tr>
+      <tr><td>Take-offs — Night</td><td>${counts.tn}</td></tr>
+      <tr><td>Take-offs — Total</td><td>${counts.tt}</td></tr>
+      <tr><td>Landings — Day</td><td>${counts.ld}</td></tr>
+      <tr><td>Landings — Night</td><td>${counts.ln}</td></tr>
+      <tr><td>Landings — Total</td><td>${counts.lt}</td></tr>
     </table></div>`;
 }
 
