@@ -116,3 +116,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v43 semantic button theme: Add actions use the existing highlighted blue, Save actions are subtle green, and Delete/Remove actions are subtle red. Close/cancel controls remain default.
 
 - v44 darkened Save/Delete colours; Add Class uses the shared blue add theme; aircraft-type remove and Pilot Role help controls are compact circular buttons.
+
+- v45 made the Pilot Role help and aircraft-type remove controls smaller and circular, added spacing beside the Pilot Role label, and explicitly applied Add/Save semantic colours to Add Class and Save Flight.

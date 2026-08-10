@@ -369,3 +369,44 @@ button.help-btn{
   line-height:1;
   font-size:13px;
 }
+
+/* v45: compact help/remove controls and explicit semantic classes */
+button.remove-type{
+  width:22px !important;
+  height:22px !important;
+  min-width:22px !important;
+  min-height:22px !important;
+  padding:0 !important;
+  border-radius:50% !important;
+  font-size:12px !important;
+}
+button.help-btn{
+  width:22px !important;
+  height:22px !important;
+  min-width:22px !important;
+  min-height:22px !important;
+  padding:0 !important;
+  border-radius:50% !important;
+  font-size:12px !important;
+}
+.role-label .help-wrap{
+  display:inline-flex;
+  align-items:center;
+  margin-left:8px;
+  vertical-align:middle;
+}
+button.add-action{
+  background:var(--accent) !important;
+  border-color:var(--accent) !important;
+  color:#07111e !important;
+}
+button.save-action{
+  background:#cfe8d6 !important;
+  border-color:#9fc8aa !important;
+  color:#1f5630 !important;
+}
+button.save-action:hover{
+  background:#bddfc7 !important;
+  border-color:#86b894 !important;
+  color:#194927 !important;
+}
