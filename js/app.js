@@ -291,8 +291,18 @@ function renderStatistics(){
 
   $("#statisticsContent").innerHTML=`
     <div class="stats-range-label">${escapeHTML(rangeLabel)} · ${data.length} flight${data.length===1?"":"s"}</div>
-    <div class="stats-item-buttons" role="group" aria-label="${title}">
-      ${groups.length?groups.map(g=>`<button type="button" class="stats-item-btn ${g.name===statsSelectedItem?"active":""}" data-stats-item="${escapeHTML(g.name)}">${escapeHTML(g.name)}</button>`).join(""):'<span class="empty">No flights in this period.</span>'}
+    <div class="panel stats-breakdown">
+      <label>Breakdown
+        <select id="statsBreakdown">
+          <option value="aircraft" ${mode==="aircraft"?"selected":""}>By Aircraft</option>
+          <option value="class" ${mode==="class"?"selected":""}>By Class</option>
+        </select>
+      </label>
+    </div>
+    <div class="panel stats-item-panel">
+      <div class="stats-item-buttons" role="group" aria-label="${title}">
+        ${groups.length?groups.map(g=>`<button type="button" class="filter-btn stats-item-btn ${g.name===statsSelectedItem?"active":""}" data-stats-item="${escapeHTML(g.name)}">${escapeHTML(g.name)}</button>`).join(""):'<span class="empty">No flights in this period.</span>'}
+      </div>
     </div>
     <div class="stats-grid">
       <div class="stat"><strong>${selected?displayHours(selected.hours):"0.0"} h</strong><span>Total time</span></div>
