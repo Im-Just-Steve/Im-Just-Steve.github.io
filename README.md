@@ -51,3 +51,6 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 
 - Compact custom DD/MM/YYYY and HH:MM flight-entry fields for consistent iPad/desktop sizing.
 - Clear confirmation after a successful in-app update.
+
+- Removed date/time placeholders so new entries open with clean fields.
+- Update success confirmation now persists through the app restart and remains visible in Settings.
