@@ -61,7 +61,7 @@
           <p class="eyebrow">DATA</p>
           <h2>Data & backup</h2>
         </div>
-        <button class="text-btn" id="backToSettingsFromDataBtn" type="button" data-view="settings">← Settings</button>
+        <button class="text-btn" id="backToSettingsFromDataBtn" type="button" onclick="showView('settings')">← Settings</button>
       </div>
       <div class="panel settings-panel">
         <h3>Export</h3>
@@ -84,7 +84,7 @@
           <p class="eyebrow">AIRCRAFT</p>
           <h2>Aircraft classes</h2>
         </div>
-        <button class="text-btn" id="backToSettingsBtn" type="button" data-view="settings">← Settings</button>
+        <button class="text-btn" id="backToSettingsBtn" type="button" onclick="showView('settings')">← Settings</button>
       </div>
       <div class="panel">
         <p class="muted">Create your own aircraft classes and choose which aircraft types belong to each class.</p>
@@ -129,11 +129,11 @@
       <div class="panel settings-panel">
         <h3>Aircraft classes</h3>
         <p class="muted">Manage aircraft classes and the types assigned to each class.</p>
-        <button class="secondary full-width" id="manageClassesBtn" type="button" data-view="aircraftClasses">Edit aircraft classes</button>
+        <button class="secondary full-width" id="manageClassesBtn" type="button" onclick="showView('aircraftClasses')">Edit aircraft classes</button>
         <hr>
         <h3>Data & backup</h3>
         <p class="muted">Export, import or permanently delete your local logbook data.</p>
-        <button class="secondary full-width" id="manageDataBtn" type="button" data-view="dataManagement">Manage data & backup</button>
+        <button class="secondary full-width" id="manageDataBtn" type="button" onclick="showView('dataManagement')">Manage data & backup</button>
         <hr>
         <h3>App update</h3>
         <p class="muted">Check GitHub Pages for a newer version of SkyLog. Your flight data is kept separately on this device.</p>

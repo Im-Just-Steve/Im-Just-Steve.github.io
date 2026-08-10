@@ -22,8 +22,8 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   $("#importInput").addEventListener("change",importData);
   $("#clearBtn").addEventListener("click",clearData);
   $("#updateBtn").addEventListener("click",checkForUpdate);
-  $("#addClassBtn").addEventListener("click",addAircraftClass);
-  $("#newClassName").addEventListener("keydown",e=>{if(e.key==="Enter")addAircraftClass();});
+  $("#addClassBtn")?.addEventListener("click",addAircraftClass);
+  $("#newClassName")?.addEventListener("keydown",e=>{if(e.key==="Enter")addAircraftClass();});
   document.addEventListener("click",e=>{
     const nav=e.target.closest("[data-view]");
     if(nav){e.preventDefault();showView(nav.dataset.view);}
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   }
 });
 
-function showView(id){
+window.showView=function showView(id){
   const target=document.getElementById(id);
   if(!target) return;
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));

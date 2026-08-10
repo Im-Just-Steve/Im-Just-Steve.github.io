@@ -68,3 +68,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Fixed dedicated Settings sub-page navigation for Aircraft Classes and Data & Backup.
 
 - Robust delegated navigation for Settings sub-pages.
+
+- Fixed Settings sub-page buttons using direct, reliable navigation handlers.
