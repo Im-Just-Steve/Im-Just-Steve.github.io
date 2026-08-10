@@ -319,3 +319,53 @@ button.delete-action:hover{
   border-color:#dca2a2;
   color:#732525;
 }
+
+/* v44: darker semantic action colours */
+button.save-action{
+  background:#cfe8d6;
+  border-color:#9fc8aa;
+  color:#1f5630;
+}
+button.save-action:hover{
+  background:#bddfc7;
+  border-color:#86b894;
+  color:#194927;
+}
+button.delete-action{
+  background:#f0d0d0;
+  border-color:#d99b9b;
+  color:#7a2525;
+}
+button.delete-action:hover{
+  background:#e8baba;
+  border-color:#c98282;
+  color:#651d1d;
+}
+
+/* Compact circular controls */
+button.remove-type{
+  width:28px;
+  height:28px;
+  min-width:28px;
+  min-height:28px;
+  padding:0;
+  border-radius:50%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+  font-size:15px;
+}
+button.help-btn{
+  width:28px;
+  height:28px;
+  min-width:28px;
+  min-height:28px;
+  padding:0;
+  border-radius:50%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+  font-size:13px;
+}
