@@ -66,3 +66,5 @@
     grid-template-columns:minmax(0,1fr);
   }
 }
+
+.form-grid label input[type="text"]{width:100%;min-width:0;max-width:100%;box-sizing:border-box;font-variant-numeric:tabular-nums}

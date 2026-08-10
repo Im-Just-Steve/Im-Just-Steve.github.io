@@ -6,6 +6,7 @@ let refreshing=false;
 document.addEventListener("DOMContentLoaded", async ()=>{
   bindNavigation();
   bindDialog();
+  setupCompactInputs();
   $("#search").addEventListener("input",renderLogbook);
   $("#yearFilter").addEventListener("change",renderLogbook);
   document.querySelectorAll("[data-stats-range]").forEach(b=>b.addEventListener("click",()=>{
@@ -26,6 +27,8 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     });
   }
   await refresh();
+  const updateMessage=sessionStorage.getItem("skylogUpdateMessage");
+  if(updateMessage){sessionStorage.removeItem("skylogUpdateMessage");setTimeout(()=>toast(updateMessage),250);}
   if("serviceWorker" in navigator){
     navigator.serviceWorker.register("sw.js").then(reg=>window.skylogRegistration=reg).catch(()=>{});
   }
@@ -52,11 +55,16 @@ function bindDialog(){
   $("#flightForm").addEventListener("submit",async e=>{
     e.preventDefault();
     const id=$("#flightId").value || crypto.randomUUID();
+    const storedDate=displayToISODate($("#date").value);
+    const depart=normaliseTime($("#departTime").value);
+    const arrival=normaliseTime($("#arrivalTime").value);
+    if(!storedDate){alert("Please enter a valid date as DD/MM/YYYY.");return;}
+    if(!depart||!arrival){alert("Please enter valid times as HH:MM.");return;}
     const flight={
-      id,date:$("#date").value,registration:$("#registration").value.trim().toUpperCase(),
+      id,date:storedDate,registration:$("#registration").value.trim().toUpperCase(),
       aircraft:$("#aircraft").value.trim().toUpperCase(),departure:$("#departure").value.trim().toUpperCase(),
-      arrival:$("#arrival").value.trim().toUpperCase(),departTime:$("#departTime").value, arrivalTime:$("#arrivalTime").value,
-      blockMinutes:calculateDuration($("#departTime").value,$("#arrivalTime").value),
+      arrival:$("#arrival").value.trim().toUpperCase(),departTime:depart, arrivalTime:arrival,
+      blockMinutes:calculateDuration(depart,arrival),
       role:$("#role").value,flightType:$("#flightType").value,nightMinutes:num("nightMinutes"),
       instrumentMinutes:num("instrumentMinutes"),takeoffs:num("takeoffs"),landings:num("landings"),remarks:$("#remarks").value.trim()
     };
@@ -64,11 +72,18 @@ function bindDialog(){
   });
 }
 const num=id=>Math.max(0,Number($("#"+id).value)||0);
+function isoToDisplayDate(iso){if(!iso)return "";const [y,m,d]=iso.split("-");return d&&m&&y?`${d}/${m}/${y}`:"";}
+function displayToISODate(value){const m=String(value||"").trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);if(!m)return "";const [,d,mo,y]=m;const dt=new Date(Number(y),Number(mo)-1,Number(d));if(dt.getFullYear()!==Number(y)||dt.getMonth()!==Number(mo)-1||dt.getDate()!==Number(d))return "";return `${y}-${mo}-${d}`;}
+function normaliseTime(value){const m=String(value||"").trim().match(/^(\d{1,2}):(\d{2})$/);if(!m)return "";const h=Number(m[1]),min=Number(m[2]);if(h>23||min>59)return "";return `${String(h).padStart(2,"0")}:${m[2]}`;}
+function formatDateInput(el){let v=el.value.replace(/\D/g,"").slice(0,8);if(v.length>4)v=v.slice(0,2)+"/"+v.slice(2,4)+"/"+v.slice(4);else if(v.length>2)v=v.slice(0,2)+"/"+v.slice(2);el.value=v;}
+function formatTimeInput(el){let v=el.value.replace(/\D/g,"").slice(0,4);if(v.length>2)v=v.slice(0,2)+":"+v.slice(2);el.value=v;}
+function setupCompactInputs(){const d=$("#date"),p=$("#departTime"),a=$("#arrivalTime");d?.addEventListener("input",()=>formatDateInput(d));p?.addEventListener("input",()=>formatTimeInput(p));a?.addEventListener("input",()=>formatTimeInput(a));}
+
 
 function openDialog(f=null){
   $("#dialogTitle").textContent=f?"Edit flight":"Log flight";
   $("#flightId").value=f?.id||"";
-  $("#date").value=f?.date||new Date().toISOString().slice(0,10);
+  $("#date").value=f?.date?isoToDisplayDate(f.date):isoToDisplayDate(new Date().toISOString().slice(0,10));
   $("#registration").value=f?.registration||"";
   $("#aircraft").value=f?.aircraft||"";
   $("#departure").value=f?.departure||"";
@@ -237,6 +252,7 @@ async function checkForUpdate(){
 
     if(reg.waiting){
       status.textContent="Update found. Installing…";
+      sessionStorage.setItem("skylogUpdateMessage","SkyLog was successfully updated to the latest version.");
       reg.waiting.postMessage({type:"SKIP_WAITING"});
       setTimeout(()=>{
         if(!refreshing){
