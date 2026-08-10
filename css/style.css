@@ -204,3 +204,64 @@
 .stats-item-panel{margin-bottom:14px}
 .stats-item-buttons{display:flex;flex-wrap:wrap;gap:8px}
 .stats-item-buttons .stats-item-btn{margin:0;min-height:0}
+
+/* v34: unified button system */
+button.primary,
+button.secondary,
+button.ghost,
+button.danger,
+button.filter-btn,
+button.text-btn,
+button.help-btn,
+button.icon-btn,
+button.remove-type{
+  box-sizing:border-box;
+  min-height:40px;
+  padding:9px 13px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--panel2);
+  color:var(--muted);
+  font-family:inherit;
+  font-size:12px;
+  font-weight:750;
+  line-height:1.2;
+  cursor:pointer;
+  text-decoration:none;
+}
+button.primary,
+button.secondary,
+button.ghost,
+button.danger{background:var(--panel2);color:var(--muted);border-color:var(--line)}
+button.filter-btn{background:var(--panel2);color:var(--muted);border-color:var(--line)}
+button.primary.active,
+button.secondary.active,
+button.ghost.active,
+button.danger.active,
+button.filter-btn.active,
+button.text-btn.active,
+button.help-btn.active,
+button.icon-btn.active,
+button.remove-type.active{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:#07111e;
+}
+button.primary:hover,
+button.secondary:hover,
+button.ghost:hover,
+button.danger:hover,
+button.filter-btn:hover,
+button.text-btn:hover,
+button.help-btn:hover,
+button.icon-btn:hover,
+button.remove-type:hover{
+  border-color:var(--accent);
+  color:var(--text);
+}
+button:disabled{opacity:.5;cursor:not-allowed}
+.stats-filter .filter-buttons,
+.stats-item-panel .stats-item-buttons{display:flex;gap:7px;flex-wrap:wrap}
+.stats-item-panel{margin-bottom:14px}
+.stats-item-buttons{display:flex;gap:7px;flex-wrap:wrap;margin:0}
+.stats-item-buttons .stats-item-btn{margin:0;min-height:40px}

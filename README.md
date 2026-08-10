@@ -97,3 +97,6 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Aircraft/Class selector buttons now use the exact same styling values as the All time/Previous 90 days stats filter buttons.
 
 - Aircraft/Class selectors are now in a matching panel and use the existing filter-btn class for identical styling to the date-range filters.
+
+- Unified normal app button styling across the UI and removed unused icon image assets.
+- Removed duplicate Statistics Breakdown control.
