@@ -93,3 +93,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Flight entry records day/night take-offs and landings separately, with backward compatibility for existing flights.
 
 - Removed the duplicated stats Breakdown control and matched aircraft/class selector buttons to the existing stats filter-button theme.
+
+- Aircraft/Class selector buttons now use the exact same styling values as the All time/Previous 90 days stats filter buttons.
