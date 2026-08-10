@@ -113,4 +113,4 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 
 - Restored the Statistics date-range container gap and fixed the Breakdown dropdown by handling change events instead of intercepting its click.
 
-- v42 button theme: default buttons retain the existing theme; Add/+ actions are light blue; Save actions are subtle green; Delete/Remove/X actions are subtle red.
+- v43 semantic button theme: Add actions use the existing highlighted blue, Save actions are subtle green, and Delete/Remove actions are subtle red. Close/cancel controls remain default.

@@ -377,18 +377,18 @@ function renderAircraftClasses(){
       <div class="class-header">
         <input class="class-name-input" value="${escapeHtml(c.name)}" maxlength="40" aria-label="Class name">
         <div class="class-actions">
-          <button type="button" class="secondary save-class save-btn">Save</button>
-          <button type="button" class="danger delete-class delete-btn">Delete</button>
+          <button type="button" class="secondary save-action save-class">Save</button>
+          <button type="button" class="danger delete-action delete-class">Delete</button>
         </div>
       </div>
       <div class="class-types">
         <div class="types-heading">Aircraft types</div>
         <div class="type-list">
-          ${(c.types||[]).map((t,i)=>`<div class="type-chip"><span>${escapeHtml(t)}</span><button type="button" class="remove-type delete-btn" data-index="${i}" aria-label="Remove ${escapeHtml(t)}">×</button></div>`).join("") || '<span class="muted">No types added yet.</span>'}
+          ${(c.types||[]).map((t,i)=>`<div class="type-chip"><span>${escapeHtml(t)}</span><button type="button" class="remove-type delete-action" data-index="${i}" aria-label="Remove ${escapeHtml(t)}">×</button></div>`).join("") || '<span class="muted">No types added yet.</span>'}
         </div>
         <div class="add-type-row">
           <input class="new-type-input" type="text" maxlength="30" placeholder="e.g. C172">
-          <button type="button" class="secondary add-type add-btn">Add type</button>
+          <button type="button" class="secondary add-action add-type">Add type</button>
         </div>
       </div>
     </div>`).join("");
