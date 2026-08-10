@@ -265,7 +265,7 @@ function renderAircraftClasses(){
   const el=$("#aircraftClassesList");
   if(!el) return;
   if(!aircraftClasses.length){
-    el.innerHTML='<p class="muted class-empty">No aircraft classes created yet.</p>';
+    el.innerHTML="";
     return;
   }
   el.innerHTML=aircraftClasses.map(c=>`

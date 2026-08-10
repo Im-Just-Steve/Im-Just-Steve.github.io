@@ -97,3 +97,26 @@
 .aircraft-classes-intro{padding-inline:8px}
 .class-create{padding-inline:8px}
 .class-create input{min-width:0}
+
+/* Aircraft Classes: keep the create row visually consistent with class controls */
+.class-create{
+  padding-inline:0;
+  margin-top:10px;
+}
+.class-create input,
+.class-create button{
+  height:42px;
+  box-sizing:border-box;
+}
+.class-create input{
+  flex:1;
+  min-width:0;
+}
+.class-create button{
+  flex:0 0 auto;
+  margin:0;
+}
+.aircraft-classes-intro{
+  padding-inline:0;
+  margin-bottom:10px;
+}

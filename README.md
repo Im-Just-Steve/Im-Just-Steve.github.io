@@ -73,3 +73,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 
 - Updated SkyLog aircraft-themed app icons.
 - Added subtle horizontal padding to the Aircraft Classes intro and create-class controls.
+
+- Aircraft Classes create controls matched to the class controls; empty class list no longer displays placeholder text.
