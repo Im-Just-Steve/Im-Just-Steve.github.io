@@ -106,3 +106,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Added consistent internal padding to Statistics containers and uniform gaps between the selector container and stats bubbles.
 
 - Fixed asymmetric top/bottom spacing around Statistics range buttons and added a uniform gap between Breakdown text and its dropdown.
+
+- Matched Statistics date-range container padding exactly to the Aircraft/Class selector container.

@@ -264,3 +264,13 @@ button:disabled{opacity:.5;cursor:not-allowed}
 #statistics .stats-breakdown select{
   margin:0;
 }
+
+/* v38: range-button container matches the Aircraft/Class container exactly */
+#statistics .stats-filter{
+  padding:16px;
+  box-sizing:border-box;
+}
+#statistics .stats-filter .filter-buttons{
+  padding:0;
+  margin:0;
+}
