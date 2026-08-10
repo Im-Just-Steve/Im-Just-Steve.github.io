@@ -112,5 +112,3 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Removed the Statistics range summary text and fixed the dynamically rendered Breakdown dropdown so it switches correctly between aircraft and class buttons.
 
 - Restored the Statistics date-range container gap and fixed the Breakdown dropdown by handling change events instead of intercepting its click.
-
-- Statistics now refreshes aircraft/class data every time the Statistics page is navigated to, so newly added aircraft types and classes appear immediately.
