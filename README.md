@@ -70,3 +70,6 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Robust delegated navigation for Settings sub-pages.
 
 - Fixed Settings sub-page buttons using direct, reliable navigation handlers.
+
+- Updated SkyLog aircraft-themed app icons.
+- Added subtle horizontal padding to the Aircraft Classes intro and create-class controls.
