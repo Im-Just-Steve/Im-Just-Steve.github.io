@@ -104,3 +104,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Removed legacy Aircraft/Class button CSS overrides so their buttons now use only the shared filter-btn styling.
 
 - Added consistent internal padding to Statistics containers and uniform gaps between the selector container and stats bubbles.
+
+- Fixed asymmetric top/bottom spacing around Statistics range buttons and added a uniform gap between Breakdown text and its dropdown.
