@@ -158,53 +158,12 @@
 .stats-breakdown-table td,.stats-breakdown-table th{text-align:right}
 .stats-breakdown-table td:first-child,.stats-breakdown-table th:first-child{text-align:left}
 
-.stats-item-buttons{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
-.stats-item-btn{border:1px solid var(--border,#d9dee7);background:var(--surface,#fff);color:inherit;border-radius:999px;padding:9px 14px;font:inherit;cursor:pointer}
-.stats-item-btn.active{background:var(--accent,#2d6cdf);color:#fff;border-color:var(--accent,#2d6cdf)}
 .stats-grid .stat small{display:block;margin-top:4px;opacity:.7;font-size:11px}
 
-.stats-item-buttons .stats-item-btn{
-  appearance:none;
-  border:1px solid var(--border-color,#d8dde6);
-  background:transparent;
-  color:inherit;
-  border-radius:8px;
-  padding:8px 14px;
-  font:inherit;
-  cursor:pointer;
-}
-.stats-item-buttons .stats-item-btn:hover{
-  background:var(--surface-hover,#f3f5f8);
-}
-.stats-item-buttons .stats-item-btn.active{
-  background:var(--accent-color,#2563eb);
-  color:#fff;
-  border-color:var(--accent-color,#2563eb);
-}
-
+.stats-item-buttons .stats-item-buttons 
 /* Aircraft/Class selector buttons: exact same styling as stats range filters */
-.stats-item-btn{
-  border:1px solid var(--line);
-  background:var(--panel2);
-  color:var(--muted);
-  border-radius:10px;
-  padding:9px 13px;
-  font-size:12px;
-  font-weight:750;
-  font-family:inherit;
-  line-height:normal;
-  box-sizing:border-box;
-}
-.stats-item-btn.active{
-  background:var(--accent);
-  border-color:var(--accent);
-  color:#07111e;
-}
 
-.stats-item-panel{margin-bottom:14px}
-.stats-item-buttons{display:flex;flex-wrap:wrap;gap:8px}
-.stats-item-buttons .stats-item-btn{margin:0;min-height:0}
-
+.stats-item-buttons 
 /* v34: unified button system */
 button.primary,
 button.secondary,
@@ -261,7 +220,8 @@ button.remove-type:hover{
 }
 button:disabled{opacity:.5;cursor:not-allowed}
 .stats-filter .filter-buttons,
-.stats-item-panel .stats-item-buttons{display:flex;gap:7px;flex-wrap:wrap}
+.stats-item-panel .stats-item-buttons 
+/* v35: aircraft/class buttons are literally the same component as range buttons */
 .stats-item-panel{margin-bottom:14px}
-.stats-item-buttons{display:flex;gap:7px;flex-wrap:wrap;margin:0}
-.stats-item-buttons .stats-item-btn{margin:0;min-height:40px}
+.stats-item-buttons{display:flex;gap:7px;flex-wrap:wrap}
+.stats-item-buttons .stats-item-btn{margin:0}

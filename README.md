@@ -100,3 +100,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 
 - Unified normal app button styling across the UI and removed unused icon image assets.
 - Removed duplicate Statistics Breakdown control.
+
+- Removed legacy Aircraft/Class button CSS overrides so their buttons now use only the shared filter-btn styling.

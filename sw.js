@@ -1,4 +1,4 @@
-const CACHE="skylog-v34";
+const CACHE="skylog-v35";
 const ASSETS=["./","./index.html","./css/style.css","./js/db.js","./js/app.js","./manifest.json"];
 
 self.addEventListener("install",e=>{
