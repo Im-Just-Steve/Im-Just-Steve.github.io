@@ -19,8 +19,6 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   }));
   $("#statsFrom").addEventListener("change",renderStatistics);
   $("#statsTo").addEventListener("change",renderStatistics);
-  $("#statsBreakdown")?.addEventListener("change",()=>{statsSelectedItem=null;renderStatistics();});
-  $("#statsBreakdown")?.addEventListener("change",renderStatistics);
   $("#exportBtn").addEventListener("click",exportData);
   $("#importInput").addEventListener("change",importData);
   $("#clearBtn").addEventListener("click",clearData);
@@ -30,6 +28,8 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   document.addEventListener("click",e=>{
     const nav=e.target.closest("[data-view]");
     if(nav){e.preventDefault();showView(nav.dataset.view);}
+    const breakdown=e.target.closest("#statsBreakdown");
+    if(breakdown){statsSelectedItem=null;renderStatistics();return;}
     const item=e.target.closest("[data-stats-item]");
     if(item){statsSelectedItem=item.dataset.statsItem;renderStatistics();}
   });
@@ -290,7 +290,6 @@ function renderStatistics(){
   const title=mode==="class"?"By Class":"By Aircraft";
 
   $("#statisticsContent").innerHTML=`
-    <div class="stats-range-label">${escapeHTML(rangeLabel)} · ${data.length} flight${data.length===1?"":"s"}</div>
     <div class="panel stats-breakdown">
       <label>Breakdown
         <select id="statsBreakdown">
