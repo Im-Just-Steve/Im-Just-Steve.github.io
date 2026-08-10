@@ -54,3 +54,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 
 - Removed date/time placeholders so new entries open with clean fields.
 - Update success confirmation now persists through the app restart and remains visible in Settings.
+
+- New flight date and time fields start blank and show DD/MM/YYYY and HH:MM placeholders; existing flights still populate their saved values when edited.

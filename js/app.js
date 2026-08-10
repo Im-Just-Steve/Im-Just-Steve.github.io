@@ -83,13 +83,13 @@ function setupCompactInputs(){const d=$("#date"),p=$("#departTime"),a=$("#arriva
 function openDialog(f=null){
   $("#dialogTitle").textContent=f?"Edit flight":"Log flight";
   $("#flightId").value=f?.id||"";
-  $("#date").value=f?.date?isoToDisplayDate(f.date):isoToDisplayDate(new Date().toISOString().slice(0,10));
+  $("#date").value=f?.date?isoToDisplayDate(f.date):"";
   $("#registration").value=f?.registration||"";
   $("#aircraft").value=f?.aircraft||"";
   $("#departure").value=f?.departure||"";
   $("#arrival").value=f?.arrival||"";
-  $("#departTime").value=f?.departTime||"09:00";
-  $("#arrivalTime").value=f?.arrivalTime||"10:00";
+  $("#departTime").value=f?.departTime||"";
+  $("#arrivalTime").value=f?.arrivalTime||"";
   $("#role").value=f?.role||"PIC";
   $("#flightType").value=f?.flightType||"VFR";
   $("#nightMinutes").value=f?.nightMinutes??0;
