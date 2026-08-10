@@ -24,6 +24,8 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   $("#updateBtn").addEventListener("click",checkForUpdate);
   $("#manageClassesBtn").addEventListener("click",()=>showView("aircraftClasses"));
   $("#backToSettingsBtn").addEventListener("click",()=>showView("settings"));
+  $("#manageDataBtn").addEventListener("click",()=>showView("dataManagement"));
+  $("#backToSettingsFromDataBtn").addEventListener("click",()=>showView("settings"));
   $("#addClassBtn").addEventListener("click",addAircraftClass);
   $("#newClassName").addEventListener("keydown",e=>{if(e.key==="Enter")addAircraftClass();});
 
