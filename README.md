@@ -84,3 +84,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Improved Home Screen PWA update behaviour with network-first app-shell fetching and immediate service-worker activation.
 
 - Replaced the topbar branding with a newly generated, fully visible SkyLog horizontal logo and made it a Home link.
+
+- Improved iPad Home Screen PWA update lifecycle: waits for the new service worker to install, activates it, waits for controllerchange, reloads, and shows a persistent success confirmation.
