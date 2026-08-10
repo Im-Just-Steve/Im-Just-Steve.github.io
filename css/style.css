@@ -133,3 +133,13 @@
   margin-top:12px;
   margin-bottom:12px;
 }
+
+/* Final Aircraft Classes empty-state spacing */
+#aircraftClasses > .panel > .aircraft-classes-intro{
+  margin:12px;
+  padding:0;
+}
+#aircraftClasses > .panel > .class-manager > .class-create{
+  margin:12px;
+  padding:0;
+}

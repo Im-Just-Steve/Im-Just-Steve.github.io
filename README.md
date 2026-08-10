@@ -79,3 +79,6 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Added clear horizontal inset to the Aircraft Classes intro and create-class controls inside the panel.
 
 - Matched the Aircraft Classes create row vertical spacing to the horizontal inset.
+
+- Fixed empty Aircraft Classes panel spacing on all sides.
+- Improved Home Screen PWA update behaviour with network-first app-shell fetching and immediate service-worker activation.

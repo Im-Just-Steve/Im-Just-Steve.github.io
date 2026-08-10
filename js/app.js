@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   }
   await refresh();
   await loadAircraftClasses();
-  const updateMessage=sessionStorage.getItem("skylogUpdateMessage");
+  const updateMessage=localStorage.getItem("skylogUpdateMessage");
   if(updateMessage){sessionStorage.removeItem("skylogUpdateMessage");setTimeout(()=>toast(updateMessage),250);}
   if("serviceWorker" in navigator){
     navigator.serviceWorker.register("sw.js").then(reg=>window.skylogRegistration=reg).catch(()=>{});
@@ -350,7 +350,7 @@ async function checkForUpdate(){
 
     if(reg.waiting){
       status.textContent="Update found. Installing…";
-      sessionStorage.setItem("skylogUpdateMessage","SkyLog was successfully updated to the latest version.");
+      localStorage.setItem("skylogUpdateMessage","SkyLog was successfully updated to the latest version.");
       reg.waiting.postMessage({type:"SKIP_WAITING"});
       setTimeout(()=>{
         if(!refreshing){
