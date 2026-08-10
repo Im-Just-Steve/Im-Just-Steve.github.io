@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   }));
   $("#statsFrom").addEventListener("change",renderStatistics);
   $("#statsTo").addEventListener("change",renderStatistics);
+  $("#statsBreakdown")?.addEventListener("change",renderStatistics);
   $("#exportBtn").addEventListener("click",exportData);
   $("#importInput").addEventListener("change",importData);
   $("#clearBtn").addEventListener("click",clearData);
@@ -82,7 +83,12 @@ function bindDialog(){
       arrival:$("#arrival").value.trim().toUpperCase(),departTime:depart, arrivalTime:arrival,
       blockMinutes:calculateDuration(depart,arrival),
       role:$("#role").value,flightType:$("#flightType").value,nightMinutes:num("nightMinutes"),
-      instrumentMinutes:num("instrumentMinutes"),takeoffs:num("takeoffs"),landings:num("landings"),remarks:$("#remarks").value.trim()
+      instrumentMinutes:num("instrumentMinutes"),
+      takeoffsDay:num("takeoffsDay"),takeoffsNight:num("takeoffsNight"),
+      landingsDay:num("landingsDay"),landingsNight:num("landingsNight"),
+      takeoffs:num("takeoffsDay")+num("takeoffsNight"),
+      landings:num("landingsDay")+num("landingsNight"),
+      remarks:$("#remarks").value.trim()
     };
     await putFlight(flight);$("#flightDialog").close();await refresh();toast("Flight saved");
   });
@@ -110,8 +116,12 @@ function openDialog(f=null){
   $("#flightType").value=f?.flightType||"VFR";
   $("#nightMinutes").value=f?.nightMinutes??0;
   $("#instrumentMinutes").value=f?.instrumentMinutes??0;
-  $("#takeoffs").value=f?.takeoffs??1;
-  $("#landings").value=f?.landings??1;
+  const oldTakeoffs=Number(f?.takeoffs)||0;
+  const oldLandings=Number(f?.landings)||0;
+  $("#takeoffsDay").value=f?.takeoffsDay!=null?f.takeoffsDay:(f?oldTakeoffs:1);
+  $("#takeoffsNight").value=f?.takeoffsNight!=null?f.takeoffsNight:0;
+  $("#landingsDay").value=f?.landingsDay!=null?f.landingsDay:(f?oldLandings:1);
+  $("#landingsNight").value=f?.landingsNight!=null?f.landingsNight:0;
   $("#remarks").value=f?.remarks||"";
   $("#deleteFlight").classList.toggle("hidden",!f);
   $("#flightDialog").showModal();
@@ -169,43 +179,89 @@ function populateYears(){
   $("#yearFilter").innerHTML='<option value="">All years</option>'+years.map(y=>`<option>${y}</option>`).join("");
   $("#yearFilter").value=years.includes(old)?old:"";
 }
+function getDayNightCounts(f){
+  const legacyT=Number(f.takeoffs)||0;
+  const legacyL=Number(f.landings)||0;
+  const tDay=f.takeoffsDay!=null?Number(f.takeoffsDay):legacyT;
+  const tNight=f.takeoffsNight!=null?Number(f.takeoffsNight):0;
+  const lDay=f.landingsDay!=null?Number(f.landingsDay):legacyL;
+  const lNight=f.landingsNight!=null?Number(f.landingsNight):0;
+  return {
+    takeoffsDay:tDay,takeoffsNight:tNight,takeoffsTotal:tDay+tNight,
+    landingsDay:lDay,landingsNight:lNight,landingsTotal:lDay+lNight
+  };
+}
+function buildStatsRows(data,mode){
+  const groups={};
+  if(mode==="class"){
+    const classByType=new Map();
+    aircraftClasses.forEach(c=>(c.types||[]).forEach(type=>{
+      const key=String(type).trim().toUpperCase();
+      if(key && !classByType.has(key)) classByType.set(key,c.name);
+    }));
+    data.forEach(f=>{
+      const aircraft=String(f.aircraft||"").trim().toUpperCase();
+      const key=classByType.get(aircraft)||"Unclassified";
+      (groups[key] ||= []).push(f);
+    });
+  }else{
+    data.forEach(f=>{
+      const key=String(f.aircraft||"Unknown").trim()||"Unknown";
+      (groups[key] ||= []).push(f);
+    });
+  }
+  return Object.entries(groups).map(([name,items])=>{
+    const c=items.reduce((a,f)=>{
+      const n=getDayNightCounts(f);
+      a.hours+=entryHours(f.blockMinutes);
+      a.takeoffsDay+=n.takeoffsDay;a.takeoffsNight+=n.takeoffsNight;a.takeoffsTotal+=n.takeoffsTotal;
+      a.landingsDay+=n.landingsDay;a.landingsNight+=n.landingsNight;a.landingsTotal+=n.landingsTotal;
+      return a;
+    },{hours:0,takeoffsDay:0,takeoffsNight:0,takeoffsTotal:0,landingsDay:0,landingsNight:0,landingsTotal:0});
+    return {name,...c};
+  }).sort((a,b)=>b.hours-a.hours);
+}
+function statsRowsTable(rows){
+  if(!rows.length) return '<div class="empty">No flights in this period.</div>';
+  return `<div class="stats-table-wrap"><table class="stat-table stats-breakdown-table">
+    <thead><tr><th>Aircraft / Class</th><th>Hours</th><th colspan="3">Take-offs</th><th colspan="3">Landings</th></tr>
+    <tr><th></th><th></th><th>Day</th><th>Night</th><th>Total</th><th>Day</th><th>Night</th><th>Total</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr><td>${escapeHTML(r.name)}</td><td>${displayHours(r.hours)} h</td>
+      <td>${r.takeoffsDay}</td><td>${r.takeoffsNight}</td><td>${r.takeoffsTotal}</td>
+      <td>${r.landingsDay}</td><td>${r.landingsNight}</td><td>${r.landingsTotal}</td></tr>`).join("")}</tbody>
+  </table></div>`;
+}
 function renderStatistics(){
   const active=$("#statistics .filter-btn.active")?.dataset.statsRange || "all";
   let data=flights;
   let rangeLabel="All time";
 
   if(active==="90"){
-    const endDate=new Date();
-    endDate.setHours(23,59,59,999);
-    const startDate=new Date(endDate);
-    startDate.setDate(startDate.getDate()-89);
-    const from=startDate.toISOString().slice(0,10);
-    const to=endDate.toISOString().slice(0,10);
-    data=flights.filter(f=>f.date>=from && f.date<=to);
+    const endDate=new Date(); endDate.setHours(23,59,59,999);
+    const startDate=new Date(endDate); startDate.setDate(startDate.getDate()-89);
+    const from=startDate.toISOString().slice(0,10),to=endDate.toISOString().slice(0,10);
+    data=flights.filter(f=>f.date>=from&&f.date<=to);
     rangeLabel=`${formatDate(from)} – ${formatDate(to)}`;
   }else if(active==="custom"){
-    const from=$("#statsFrom").value;
-    const to=$("#statsTo").value;
-    if(from && to){
-      data=flights.filter(f=>f.date>=from && f.date<=to);
-      rangeLabel=`${formatDate(from)} – ${formatDate(to)}`;
-    }else{
-      data=[];
-      rangeLabel="Choose a start and end date";
-    }
+    const from=$("#statsFrom").value,to=$("#statsTo").value;
+    if(from&&to){data=flights.filter(f=>f.date>=from&&f.date<=to);rangeLabel=`${formatDate(from)} – ${formatDate(to)}`;}
+    else {data=[];rangeLabel="Choose a start and end date";}
   }
 
-  const byAircraft={};
-  data.forEach(f=>byAircraft[f.aircraft]=(byAircraft[f.aircraft]||0)+entryHours(f.blockMinutes));
-  const entries=Object.entries(byAircraft).sort((a,b)=>b[1]-a[1]);
-  const max=entries[0]?.[1]||1;
   const totalTime=sumRoundedHours(data);
-  const picTime=sumRoundedHours(data.filter(f=>f.role==="P.1" || f.role==="P.1/S"));
+  const picTime=sumRoundedHours(data.filter(f=>f.role==="P.1"||f.role==="P.1/S"));
   const nightTime=sumRoundedHours(data,"nightMinutes");
   const instrumentTime=sumRoundedHours(data,"instrumentMinutes");
-  const takeoffs=total("takeoffs"); // overwritten below for filtered set
-  const filteredTakeoffs=data.reduce((s,f)=>s+(Number(f.takeoffs)||0),0);
-  const filteredLandings=data.reduce((s,f)=>s+(Number(f.landings)||0),0);
+  const counts=data.reduce((a,f)=>{
+    const n=getDayNightCounts(f);
+    a.takeoffsDay+=n.takeoffsDay;a.takeoffsNight+=n.takeoffsNight;a.takeoffsTotal+=n.takeoffsTotal;
+    a.landingsDay+=n.landingsDay;a.landingsNight+=n.landingsNight;a.landingsTotal+=n.landingsTotal;
+    return a;
+  },{takeoffsDay:0,takeoffsNight:0,takeoffsTotal:0,landingsDay:0,landingsNight:0,landingsTotal:0});
+
+  const mode=$("#statsBreakdown")?.value||"aircraft";
+  const rows=buildStatsRows(data,mode);
+  const title=mode==="class"?"By Class":"By Aircraft";
 
   $("#statisticsContent").innerHTML=`
     <div class="stats-range-label">${escapeHTML(rangeLabel)} · ${data.length} flight${data.length===1?"":"s"}</div>
@@ -213,22 +269,28 @@ function renderStatistics(){
       <div class="stat"><strong>${displayHours(totalTime)} h</strong><span>Total time</span></div>
       <div class="stat"><strong>${displayHours(picTime)} h</strong><span>P.1 / P.1/S</span></div>
       <div class="stat"><strong>${displayHours(nightTime)} h</strong><span>Night</span></div>
-      <div class="stat"><strong>${filteredTakeoffs}</strong><span>Take-offs</span></div>
-      <div class="stat"><strong>${filteredLandings}</strong><span>Landings</span></div>
+      <div class="stat"><strong>${counts.takeoffsTotal}</strong><span>Take-offs</span></div>
+      <div class="stat"><strong>${counts.landingsTotal}</strong><span>Landings</span></div>
     </div>
-    <div class="panel" style="margin-bottom:14px"><div class="panel-head"><h3>By aircraft</h3></div><div class="bars">
-      ${entries.length?entries.map(([k,v])=>`<div class="bar-row"><strong>${escapeHTML(k)}</strong><div class="bar"><i style="width:${Math.max(2,v/max*100)}%"></i></div><span>${displayHours(v)} h</span></div>`).join(""):`<div class="empty">No flights in this period.</div>`}
-    </div></div>
+    <div class="panel stats-detail-panel">
+      <div class="panel-head"><h3>${title}</h3></div>
+      ${statsRowsTable(rows)}
+    </div>
     <div class="panel"><table class="stat-table">
       <tr><td>Flights</td><td>${data.length}</td></tr>
       <tr><td>Total time</td><td>${displayHours(totalTime)} h</td></tr>
       <tr><td>P.1 / P.1/S time</td><td>${displayHours(picTime)} h</td></tr>
       <tr><td>Night time</td><td>${displayHours(nightTime)} h</td></tr>
       <tr><td>Instrument time</td><td>${displayHours(instrumentTime)} h</td></tr>
-      <tr><td>Take-offs</td><td>${filteredTakeoffs}</td></tr>
-      <tr><td>Landings</td><td>${filteredLandings}</td></tr>
+      <tr><td>Take-offs — Day</td><td>${counts.takeoffsDay}</td></tr>
+      <tr><td>Take-offs — Night</td><td>${counts.takeoffsNight}</td></tr>
+      <tr><td>Take-offs — Total</td><td>${counts.takeoffsTotal}</td></tr>
+      <tr><td>Landings — Day</td><td>${counts.landingsDay}</td></tr>
+      <tr><td>Landings — Night</td><td>${counts.landingsNight}</td></tr>
+      <tr><td>Landings — Total</td><td>${counts.landingsTotal}</td></tr>
     </table></div>`;
 }
+
 function formatDate(s){return new Date(s+"T12:00:00").toLocaleDateString(undefined,{day:"2-digit",month:"short",year:"numeric"})}
 function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800)}

@@ -88,3 +88,6 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Improved iPad Home Screen PWA update lifecycle: waits for the new service worker to install, activates it, waits for controllerchange, reloads, and shows a persistent success confirmation.
 
 - Fixed SkyLog logo home navigation to target the dashboard view.
+
+- Stats breakdown selector for By Aircraft / By Class, with decimal hours and day/night/total take-offs and landings.
+- Flight entry records day/night take-offs and landings separately, with backward compatibility for existing flights.

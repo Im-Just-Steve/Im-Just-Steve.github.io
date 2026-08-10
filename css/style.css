@@ -147,3 +147,13 @@
 .brand-link{display:flex;align-items:center;text-decoration:none;min-width:0}
 .brand-logo{display:block;width:auto;height:42px;max-width:220px;object-fit:contain}
 @media(max-width:500px){.brand-logo{height:36px;max-width:190px}}
+
+.stats-breakdown{margin-bottom:14px}
+.stats-breakdown label{display:block;max-width:320px}
+.stats-breakdown select{width:100%;box-sizing:border-box}
+.stats-detail-panel{margin-bottom:14px}
+.stats-table-wrap{overflow-x:auto}
+.stats-breakdown-table{min-width:760px}
+.stats-breakdown-table th{white-space:nowrap;font-size:11px}
+.stats-breakdown-table td,.stats-breakdown-table th{text-align:right}
+.stats-breakdown-table td:first-child,.stats-breakdown-table th:first-child{text-align:left}

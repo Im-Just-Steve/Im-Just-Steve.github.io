@@ -115,6 +115,14 @@
           <label>To<input id="statsTo" type="date"></label>
         </div>
       </div>
+      <div class="panel stats-breakdown">
+        <label>Breakdown
+          <select id="statsBreakdown">
+            <option value="aircraft">By Aircraft</option>
+            <option value="class">By Class</option>
+          </select>
+        </label>
+      </div>
       <div id="statisticsContent"></div>
     </section>
 
@@ -184,8 +192,10 @@
         </label>
         <label>Night minutes<input id="nightMinutes" type="number" min="0" value="0"></label>
         <label>Instrument minutes<input id="instrumentMinutes" type="number" min="0" value="0"></label>
-        <label>Take-offs<input id="takeoffs" type="number" min="0" value="1"></label>
-        <label>Landings<input id="landings" type="number" min="0" value="1"></label>
+        <label>Take-offs — Day<input id="takeoffsDay" type="number" min="0" value="1"></label>
+        <label>Take-offs — Night<input id="takeoffsNight" type="number" min="0" value="0"></label>
+        <label>Landings — Day<input id="landingsDay" type="number" min="0" value="1"></label>
+        <label>Landings — Night<input id="landingsNight" type="number" min="0" value="0"></label>
         <label>Remarks<input id="remarks" placeholder="Local, circuits, XC…"></label>
       </div>
       <div class="dialog-actions">
