@@ -279,3 +279,80 @@ button:disabled{opacity:.5;cursor:not-allowed}
 #statistics .stats-filter{
   margin-bottom:16px;
 }
+
+/* v42 button theme:
+   default = existing theme
+   add / plus = light blue
+   save = subtle green
+   delete / close = subtle red
+*/
+button.add-btn,
+button[data-action="add"],
+button[class*="add"],
+button[class*="plus"],
+button[aria-label*="Add"],
+button[aria-label*="add"]{
+  background:#dff2ff;
+  border-color:#a9dcfa;
+  color:#14577a;
+}
+button.add-btn:hover,
+button[data-action="add"]:hover,
+button[class*="add"]:hover,
+button[class*="plus"]:hover,
+button[aria-label*="Add"]:hover,
+button[aria-label*="add"]:hover{
+  background:#c9eaff;
+  border-color:#8ccff5;
+  color:#104b69;
+}
+
+button.save-btn,
+button[data-action="save"],
+button[class*="save"],
+button[aria-label*="Save"],
+button[aria-label*="save"]{
+  background:#e4f5e9;
+  border-color:#b9dfc4;
+  color:#28643a;
+}
+button.save-btn:hover,
+button[data-action="save"]:hover,
+button[class*="save"]:hover,
+button[aria-label*="Save"]:hover,
+button[aria-label*="save"]:hover{
+  background:#d3eedb;
+  border-color:#9fd0ad;
+  color:#215431;
+}
+
+button.delete-btn,
+button[data-action="delete"],
+button[class*="delete"],
+button[class*="remove"],
+button[aria-label*="Delete"],
+button[aria-label*="delete"],
+button[aria-label*="Remove"],
+button[aria-label*="remove"],
+button.close-btn,
+button[aria-label="Close"],
+button[title="Close"]{
+  background:#f9e4e4;
+  border-color:#e7bcbc;
+  color:#8a3030;
+}
+button.delete-btn:hover,
+button[data-action="delete"]:hover,
+button[class*="delete"]:hover,
+button[class*="remove"]:hover,
+button[aria-label*="Delete"]:hover,
+button[aria-label*="delete"]:hover,
+button[aria-label*="Remove"]:hover,
+button[aria-label*="remove"]:hover,
+button.close-btn:hover,
+button[aria-label="Close"]:hover,
+button[title="Close"]:hover{
+  background:#f4d3d3;
+  border-color:#dca2a2;
+  color:#732525;
+}

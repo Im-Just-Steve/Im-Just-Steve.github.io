@@ -73,7 +73,7 @@
         <hr>
         <h3>Delete all data</h3>
         <p class="muted">Permanently delete all flights stored on this device. This cannot be undone.</p>
-        <button class="danger" id="clearBtn">Delete all flights</button>
+        <button class="danger delete-btn" id="clearBtn">Delete all flights</button>
       </div>
     </section>
 
@@ -90,7 +90,7 @@
         <div class="class-manager">
           <div class="class-create">
             <input id="newClassName" type="text" placeholder="New class name" maxlength="40">
-            <button class="secondary" id="addClassBtn" type="button">Add class</button>
+            <button class="secondary add-btn" id="addClassBtn" type="button">Add class</button>
           </div>
           <div id="aircraftClassesList"></div>
         </div>
@@ -156,7 +156,7 @@
           <p class="eyebrow">FLIGHT ENTRY</p>
           <h2 id="dialogTitle">Log flight</h2>
         </div>
-        <button type="button" class="icon-btn" id="closeDialog">×</button>
+        <button type="button" class="icon-btn delete-btn" id="closeDialog">×</button>
       </div>
       <input type="hidden" id="flightId">
       <div class="form-grid">
@@ -191,10 +191,10 @@
         <label>Remarks<input id="remarks" placeholder="Local, circuits, XC…"></label>
       </div>
       <div class="dialog-actions">
-        <button type="button" class="danger hidden" id="deleteFlight">Delete</button>
+        <button type="button" class="danger hidden delete-btn" id="deleteFlight">Delete</button>
         <span></span>
-        <button type="button" class="secondary" id="cancelDialog">Cancel</button>
-        <button class="primary" value="default">Save flight</button>
+        <button type="button" class="secondary delete-btn" id="cancelDialog">Cancel</button>
+        <button class="primary save-btn" value="default">Save flight</button>
       </div>
     </form>
   </dialog>

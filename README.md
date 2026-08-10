@@ -112,3 +112,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Removed the Statistics range summary text and fixed the dynamically rendered Breakdown dropdown so it switches correctly between aircraft and class buttons.
 
 - Restored the Statistics date-range container gap and fixed the Breakdown dropdown by handling change events instead of intercepting its click.
+
+- v42 button theme: default buttons retain the existing theme; Add/+ actions are light blue; Save actions are subtle green; Delete/Remove/X actions are subtle red.
