@@ -47,3 +47,30 @@ async function clearFlights(){
     req.onsuccess=()=>resolve(); req.onerror=()=>reject(req.error);
   });
 }
+async function getAircraftClasses(){
+  const db=await openDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction("aircraftClasses","readonly");
+    const req=tx.objectStore("aircraftClasses").getAll();
+    req.onsuccess=()=>resolve(req.result||[]);
+    req.onerror=()=>reject(req.error);
+  });
+}
+async function saveAircraftClass(item){
+  const db=await openDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction("aircraftClasses","readwrite");
+    tx.objectStore("aircraftClasses").put(item);
+    tx.oncomplete=()=>resolve(item);
+    tx.onerror=()=>reject(tx.error);
+  });
+}
+async function deleteAircraftClass(id){
+  const db=await openDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction("aircraftClasses","readwrite");
+    tx.objectStore("aircraftClasses").delete(id);
+    tx.oncomplete=()=>resolve();
+    tx.onerror=()=>reject(tx.error);
+  });
+}
