@@ -120,3 +120,10 @@
   padding-inline:0;
   margin-bottom:10px;
 }
+
+/* Give the Aircraft Classes intro and create controls breathing room inside the panel */
+#aircraftClasses > .panel > .aircraft-classes-intro,
+#aircraftClasses > .panel > .class-manager > .class-create{
+  margin-left:12px;
+  margin-right:12px;
+}
