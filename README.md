@@ -110,3 +110,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Matched Statistics date-range container padding exactly to the Aircraft/Class selector container.
 
 - Removed the Statistics range summary text and fixed the dynamically rendered Breakdown dropdown so it switches correctly between aircraft and class buttons.
+
+- Restored the Statistics date-range container gap and fixed the Breakdown dropdown by handling change events instead of intercepting its click.

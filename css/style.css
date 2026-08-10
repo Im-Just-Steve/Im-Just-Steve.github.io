@@ -274,3 +274,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
   padding:0;
   margin:0;
 }
+
+/* v40: restore the standard gap below the Statistics date-range container */
+#statistics .stats-filter{
+  margin-bottom:16px;
+}

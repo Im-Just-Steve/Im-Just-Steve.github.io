@@ -28,10 +28,14 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   document.addEventListener("click",e=>{
     const nav=e.target.closest("[data-view]");
     if(nav){e.preventDefault();showView(nav.dataset.view);}
-    const breakdown=e.target.closest("#statsBreakdown");
-    if(breakdown){statsSelectedItem=null;renderStatistics();return;}
     const item=e.target.closest("[data-stats-item]");
     if(item){statsSelectedItem=item.dataset.statsItem;renderStatistics();}
+  });
+  document.addEventListener("change",e=>{
+    if(e.target.id==="statsBreakdown"){
+      statsSelectedItem=null;
+      renderStatistics();
+    }
   });
 
   if("serviceWorker" in navigator){
