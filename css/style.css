@@ -162,3 +162,22 @@
 .stats-item-btn{border:1px solid var(--border,#d9dee7);background:var(--surface,#fff);color:inherit;border-radius:999px;padding:9px 14px;font:inherit;cursor:pointer}
 .stats-item-btn.active{background:var(--accent,#2d6cdf);color:#fff;border-color:var(--accent,#2d6cdf)}
 .stats-grid .stat small{display:block;margin-top:4px;opacity:.7;font-size:11px}
+
+.stats-item-buttons .stats-item-btn{
+  appearance:none;
+  border:1px solid var(--border-color,#d8dde6);
+  background:transparent;
+  color:inherit;
+  border-radius:8px;
+  padding:8px 14px;
+  font:inherit;
+  cursor:pointer;
+}
+.stats-item-buttons .stats-item-btn:hover{
+  background:var(--surface-hover,#f3f5f8);
+}
+.stats-item-buttons .stats-item-btn.active{
+  background:var(--accent-color,#2563eb);
+  color:#fff;
+  border-color:var(--accent-color,#2563eb);
+}

@@ -91,3 +91,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 
 - Stats breakdown selector for By Aircraft / By Class, with decimal hours and day/night/total take-offs and landings.
 - Flight entry records day/night take-offs and landings separately, with backward compatibility for existing flights.
+
+- Removed the duplicated stats Breakdown control and matched aircraft/class selector buttons to the existing stats filter-button theme.
