@@ -86,3 +86,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Replaced the topbar branding with a newly generated, fully visible SkyLog horizontal logo and made it a Home link.
 
 - Improved iPad Home Screen PWA update lifecycle: waits for the new service worker to install, activates it, waits for controllerchange, reloads, and shows a persistent success confirmation.
+
+- Fixed SkyLog logo home navigation to target the dashboard view.

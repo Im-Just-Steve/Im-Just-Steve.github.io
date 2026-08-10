@@ -22,11 +22,6 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   $("#importInput").addEventListener("change",importData);
   $("#clearBtn").addEventListener("click",clearData);
   $("#updateBtn").addEventListener("click",checkForUpdate);
-  $("#brandHomeLink")?.addEventListener("click",e=>{
-    e.preventDefault();
-    showView("home");
-    window.scrollTo({top:0,behavior:"smooth"});
-  });
   $("#addClassBtn")?.addEventListener("click",addAircraftClass);
   $("#newClassName")?.addEventListener("keydown",e=>{if(e.key==="Enter")addAircraftClass();});
   document.addEventListener("click",e=>{
