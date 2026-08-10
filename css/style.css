@@ -225,3 +225,22 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .stats-item-panel{margin-bottom:14px}
 .stats-item-buttons{display:flex;gap:7px;flex-wrap:wrap}
 .stats-item-buttons .stats-item-btn{margin:0}
+
+/* v36: consistent Statistics panel spacing */
+#statistics .panel{
+  padding:16px;
+  box-sizing:border-box;
+}
+#statistics .stats-item-panel{
+  margin-bottom:16px;
+}
+#statistics .stats-breakdown{
+  margin-bottom:16px;
+}
+#statistics .stats-detail-bubbles{
+  margin-top:0;
+  margin-bottom:16px;
+}
+#statistics .stats-item-buttons{
+  margin:0;
+}
