@@ -143,3 +143,7 @@
   margin:12px;
   padding:0;
 }
+
+.brand-link{display:flex;align-items:center;text-decoration:none;min-width:0}
+.brand-logo{display:block;width:auto;height:42px;max-width:220px;object-fit:contain}
+@media(max-width:500px){.brand-logo{height:36px;max-width:190px}}

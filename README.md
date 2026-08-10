@@ -82,3 +82,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 
 - Fixed empty Aircraft Classes panel spacing on all sides.
 - Improved Home Screen PWA update behaviour with network-first app-shell fetching and immediate service-worker activation.
+
+- Replaced topbar text branding with the SkyLog horizontal logo; logo links back to Home.
