@@ -172,3 +172,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.71: fixed Phase 1 crop-handle dragging on iPad/iOS with document-level pointer tracking and an explicit touch-event fallback.
 
 - v0.72: fixed iOS crop-handle offset/jumping by mapping touch coordinates to the source image's natural pixels and preventing duplicate PointerEvent/touch handling.
+
+- v0.73: inset Phase 1 crop handles slightly for easier grabbing, enlarged their touch target, and added a live magnified precision view while dragging.

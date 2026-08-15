@@ -778,3 +778,48 @@ button.save-action:hover{
 /* v0.71: reliable iOS/iPadOS finger dragging for crop handles */
 .scan-canvas-wrap{touch-action:none;-webkit-user-select:none;user-select:none}
 .scan-corner{touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+
+/* v0.73: easier crop handles and precision magnifier */
+.scan-corner{
+  width:32px;
+  height:32px;
+  border-width:3px;
+  z-index:20;
+}
+.scan-magnifier{
+  position:absolute;
+  width:150px;
+  height:150px;
+  border-radius:50%;
+  overflow:hidden;
+  z-index:30;
+  pointer-events:none;
+  border:3px solid #fff;
+  box-shadow:0 4px 18px rgba(0,0,0,.55);
+  background:#111;
+}
+.scan-magnifier canvas{
+  display:block;
+  width:150px;
+  height:150px;
+}
+.scan-magnifier-crosshair{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:18px;
+  height:18px;
+  transform:translate(-50%,-50%);
+  border:2px solid rgba(255,255,255,.95);
+  border-radius:50%;
+  box-sizing:border-box;
+  box-shadow:0 0 0 1px rgba(0,0,0,.55);
+}
+.scan-magnifier-crosshair::before,
+.scan-magnifier-crosshair::after{
+  content:"";
+  position:absolute;
+  background:rgba(255,255,255,.95);
+}
+.scan-magnifier-crosshair::before{width:2px;height:26px;left:6px;top:-6px}
+.scan-magnifier-crosshair::after{height:2px;width:26px;left:-6px;top:6px}

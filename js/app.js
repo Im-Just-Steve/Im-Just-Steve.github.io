@@ -272,7 +272,13 @@ function scanClamp(v,min,max){return Math.max(min,Math.min(max,v));}
 function scanResetCorners(){
   if(!scanImage)return;
   const w=scanImage.naturalWidth,h=scanImage.naturalHeight;
-  scanCorners=[{x:0,y:0},{x:w,y:0},{x:w,y:h},{x:0,y:h}];
+  const inset=Math.min(w,h)*0.025;
+  scanCorners=[
+    {x:inset,y:inset},
+    {x:w-inset,y:inset},
+    {x:w-inset,y:h-inset},
+    {x:inset,y:h-inset}
+  ];
 }
 function scanRotateSource(){
   if(!scanImage)return;
@@ -549,6 +555,39 @@ function scanAnalysePage(){
   scanStructureDraw();
 }
 
+
+function scanUpdateMagnifier(point){
+  const mag=$("#scanMagnifier"),canvas=$("#scanMagnifierCanvas");
+  if(!mag||!canvas||!scanImage||scanDragIndex<0)return;
+  const c=$("#scanCanvas"),r=c.getBoundingClientRect();
+  const displayX=point.x-r.left,displayY=point.y-r.top;
+  // Keep the magnifier near the finger, but move it to the opposite side
+  // when necessary so it does not obscure the corner being adjusted.
+  const side=displayX<r.width/2?1:-1;
+  mag.style.left=`${scanClamp(displayX+(side*92)-75,5,r.width-155)}px`;
+  mag.style.top=`${scanClamp(displayY-95,5,r.height-155)}px`;
+  mag.classList.remove("hidden");
+
+  const ctx=canvas.getContext("2d");
+  const naturalW=scanImage.naturalWidth,naturalH=scanImage.naturalHeight;
+  const sx=point.x-r.left;
+  const sy=point.y-r.top;
+  const ix=sx*(naturalW/r.width);
+  const iy=sy*(naturalH/r.height);
+  const sourceSize=Math.min(naturalW,naturalH)/7;
+  ctx.clearRect(0,0,150,150);
+  ctx.fillStyle="#111";ctx.fillRect(0,0,150,150);
+  ctx.drawImage(
+    scanImage,
+    ix-sourceSize/2,iy-sourceSize/2,sourceSize,sourceSize,
+    0,0,150,150
+  );
+}
+function scanHideMagnifier(){
+  const mag=$("#scanMagnifier");
+  if(mag)mag.classList.add("hidden");
+}
+
 function bindScanLogbook(){
   $("#scanLogbookInput").addEventListener("change",e=>{
     const file=e.target.files?.[0];e.target.value="";if(!file)return;
@@ -584,6 +623,8 @@ function bindScanLogbook(){
     if(e.pointerType==="touch")return;
     e.preventDefault();
     scanDragIndex=Number(el.dataset.corner);
+    const r=$("#scanCanvas").getBoundingClientRect();
+    scanUpdateMagnifier({x:e.clientX,y:e.clientY});
     if(e.pointerId!==undefined && el.setPointerCapture){
       try{el.setPointerCapture(e.pointerId);}catch(_){}
     }
@@ -594,10 +635,12 @@ function bindScanLogbook(){
     if(e.cancelable)e.preventDefault();
     const p=scanCanvasPoint(e);
     scanCorners[scanDragIndex]={x:p.x,y:p.y};
+    scanUpdateMagnifier(e);
     scanDraw();
   };
   const scanEndDrag=()=>{
     scanDragIndex=-1;
+    scanHideMagnifier();
   };
   document.addEventListener("pointerdown",scanStartDrag,{passive:false});
   document.addEventListener("pointermove",scanMoveDrag,{passive:false});
@@ -610,6 +653,8 @@ function bindScanLogbook(){
     if(!el)return;
     e.preventDefault();
     scanDragIndex=Number(el.dataset.corner);
+    const t=e.touches[0];
+    if(t)scanUpdateMagnifier(t);
   },{passive:false});
   document.addEventListener("touchmove",e=>{
     if(scanDragIndex<0||!scanImage)return;
@@ -618,6 +663,7 @@ function bindScanLogbook(){
     if(!t)return;
     const p=scanCanvasPoint(t);
     scanCorners[scanDragIndex]={x:p.x,y:p.y};
+    scanUpdateMagnifier(t);
     scanDraw();
   },{passive:false});
   document.addEventListener("touchend",scanEndDrag,{passive:false});
