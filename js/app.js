@@ -1,4 +1,19 @@
 const $=s=>document.querySelector(s);
+let APP_VERSION="";
+
+async function loadAppVersion(){
+  try{
+    const response=await fetch("./version.json",{cache:"no-cache"});
+    if(!response.ok) throw new Error("Version file unavailable");
+    const info=await response.json();
+    APP_VERSION=String(info.version||"").trim();
+  }catch(err){
+    APP_VERSION="Unknown";
+  }
+  const versionEl=$("#appVersion");
+  if(versionEl) versionEl.textContent=APP_VERSION;
+}
+
 let flights=[];
 let deferredInstall=null;
 let refreshing=false;
@@ -43,6 +58,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
       if(refreshing) window.location.reload();
     });
   }
+  await loadAppVersion();
   await refresh();
   await loadAircraftClasses();
   const updateMessage=localStorage.getItem("skylogUpdateMessage");
