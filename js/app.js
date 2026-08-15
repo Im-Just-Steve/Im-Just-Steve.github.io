@@ -567,15 +567,40 @@ function bindScanLogbook(){
   };
   $("#scanAnalyseBtn").onclick=scanAnalysePage;
   $("#scanAddPhysicalBtn").onclick=scanAddToPhysical;
-  document.querySelectorAll(".scan-corner").forEach(el=>{
-    el.addEventListener("pointerdown",e=>{e.preventDefault();scanDragIndex=Number(el.dataset.corner);el.setPointerCapture(e.pointerId);});
-    el.addEventListener("pointermove",e=>{
-      if(scanDragIndex<0||!scanImage)return;
-      const p=scanCanvasPoint(e);scanCorners[scanDragIndex]={x:p.x,y:p.y};scanDraw();
-    });
-    el.addEventListener("pointerup",()=>{scanDragIndex=-1;});
-    el.addEventListener("pointercancel",()=>{scanDragIndex=-1;});
-  });
+  // iPad/iOS can be less reliable with pointer events on dynamically positioned
+  // overlay handles. Use document-level pointer/touch tracking so the handle
+  // continues following the finger even when the finger leaves the small dot.
+  const scanStartDrag=e=>{
+    const el=e.target.closest(".scan-corner");
+    if(!el)return;
+    e.preventDefault();
+    scanDragIndex=Number(el.dataset.corner);
+    if(e.pointerId!==undefined && el.setPointerCapture){
+      try{el.setPointerCapture(e.pointerId);}catch(_){}
+    }
+  };
+  const scanMoveDrag=e=>{
+    if(scanDragIndex<0||!scanImage)return;
+    if(e.cancelable)e.preventDefault();
+    const pointEvent=e.touches?e.touches[0]:e;
+    if(!pointEvent)return;
+    const p=scanCanvasPoint(pointEvent);
+    scanCorners[scanDragIndex]={x:p.x,y:p.y};
+    scanDraw();
+  };
+  const scanEndDrag=()=>{
+    scanDragIndex=-1;
+  };
+  document.addEventListener("pointerdown",scanStartDrag,{passive:false});
+  document.addEventListener("pointermove",scanMoveDrag,{passive:false});
+  document.addEventListener("pointerup",scanEndDrag,{passive:false});
+  document.addEventListener("pointercancel",scanEndDrag,{passive:false});
+  // Explicit touch fallback for iOS versions/webviews where Pointer Events
+  // don't deliver continuous movement reliably.
+  document.addEventListener("touchstart",scanStartDrag,{passive:false});
+  document.addEventListener("touchmove",scanMoveDrag,{passive:false});
+  document.addEventListener("touchend",scanEndDrag,{passive:false});
+  document.addEventListener("touchcancel",scanEndDrag,{passive:false});
   window.addEventListener("resize",()=>{
     if(scanImage){
       scanDraw();

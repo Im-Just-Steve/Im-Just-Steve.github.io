@@ -774,3 +774,7 @@ button.save-action:hover{
   .scan-structure-summary{display:block}
   .scan-detect-box span{font-size:7px}
 }
+
+/* v0.71: reliable iOS/iPadOS finger dragging for crop handles */
+.scan-canvas-wrap{touch-action:none;-webkit-user-select:none;user-select:none}
+.scan-corner{touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
