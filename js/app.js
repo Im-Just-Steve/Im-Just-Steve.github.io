@@ -348,25 +348,44 @@ function renderStatistics(){
   }
 
   const aggregate=list=>list.reduce((a,f)=>{
-    const n=getDayNightCounts(f),hours=entryHours(Number(f.blockMinutes)||0);
-    a.hours+=hours;
+    const n=getDayNightCounts(f);
+    const hours=entryHours(Number(f.blockMinutes)||0);
+    const actual=entryHours(Number(f.instrumentMinutesActual??f.instrumentMinutes)||0);
+    const simulated=entryHours(Number(f.instrumentMinutesSimulated)||0);
     const rules=String(f.flightType||"VFR").toUpperCase();
-    if(rules==="VFR + IFR"){
-      a.vfrHours+=entryHours(Number(f.vfrMinutes)||0);
-      a.ifrHours+=entryHours(Number(f.ifrMinutes)||0);
+    const nightMinutes=Number(f.nightMinutes)||0;
+
+    a.hours+=hours;
+    a.actualInstrument+=actual;
+    a.simulatedInstrument+=simulated;
+    a.takeoffsDay+=n.takeoffsDay;
+    a.takeoffsNight+=n.takeoffsNight;
+    a.landingsDay+=n.landingsDay;
+    a.landingsNight+=n.landingsNight;
+
+    if(rules==="VFR"){
+      a.vfrHours+=hours;
+      a.nightVfr+=entryHours(nightMinutes);
     }else if(rules==="IFR"){
       a.ifrHours+=hours;
+      a.nightIfr+=entryHours(nightMinutes);
     }else{
-      a.vfrHours+=hours;
+      a.vfrHours+=entryHours(Number(f.vfrMinutes)||0);
+      a.ifrHours+=entryHours(Number(f.ifrMinutes)||0);
+      const mixedTotal=(Number(f.vfrMinutes)||0)+(Number(f.ifrMinutes)||0);
+      if(mixedTotal>0){
+        a.nightVfr+=entryHours(nightMinutes*(Number(f.vfrMinutes)||0)/mixedTotal);
+        a.nightIfr+=entryHours(nightMinutes*(Number(f.ifrMinutes)||0)/mixedTotal);
+      }
     }
-    a.instrumentHours+=entryHours(Number(f.instrumentMinutesActual??f.instrumentMinutes)||0);
-    a.instrumentHours+=entryHours(Number(f.instrumentMinutesSimulated)||0);
-    a.takeoffsDay+=n.takeoffsDay;a.takeoffsNight+=n.takeoffsNight;a.takeoffsTotal+=n.takeoffsTotal;
-    a.landingsDay+=n.landingsDay;a.landingsNight+=n.landingsNight;a.landingsTotal+=n.landingsTotal;
     return a;
-  },{hours:0,vfrHours:0,ifrHours:0,instrumentHours:0,takeoffsDay:0,takeoffsNight:0,takeoffsTotal:0,landingsDay:0,landingsNight:0,landingsTotal:0});
+  },{hours:0,vfrHours:0,ifrHours:0,nightVfr:0,nightIfr:0,actualInstrument:0,simulatedInstrument:0,takeoffsDay:0,takeoffsNight:0,landingsDay:0,landingsNight:0});
 
   const stats=aggregate(selectedData);
+  const pic=aggregate(selectedData.filter(f=>f.role==="P.1"||f.role==="P.1/S"||f.role==="P.1 (Instructor)"));
+  const dual=aggregate(selectedData.filter(f=>f.role==="P.U/T"));
+  const instructor=aggregate(selectedData.filter(f=>f.role==="P.1 (Instructor)"));
+  const night=aggregate(selectedData.filter(f=>(Number(f.nightMinutes)||0)>0));
   const title=mode==="all"?"All Flights":mode==="class"?"By Class":mode==="registration"?"By Registration":"By Aircraft";
 
   $("#statisticsContent").innerHTML=`
@@ -413,25 +432,41 @@ function renderStatistics(){
             : '<span class="empty">No flights in this period.</span>'}
       </div>
     </div>
-    <div class="stats-grid">
+    <div class="stats-grid stats-grid-expanded">
       <div class="stat">
         <strong>${displayHours(stats.hours)} h</strong>
-        <span>Total time</span>
+        <span>Total Time</span>
         <small>VFR ${displayHours(stats.vfrHours)} h · IFR ${displayHours(stats.ifrHours)} h</small>
       </div>
       <div class="stat">
-        <strong>${displayHours(stats.instrumentHours)} h</strong>
-        <span>Instrument time</span>
+        <strong>${displayHours(pic.hours)} h</strong>
+        <span>PIC</span>
+        <small>VFR ${displayHours(pic.vfrHours)} h · IFR ${displayHours(pic.ifrHours)} h</small>
       </div>
       <div class="stat">
-        <strong>${stats.takeoffsTotal}</strong>
-        <span>Take-offs</span>
-        <small>Day ${stats.takeoffsDay} · Night ${stats.takeoffsNight}</small>
+        <strong>${displayHours(dual.hours)} h</strong>
+        <span>Dual</span>
+        <small>VFR ${displayHours(dual.vfrHours)} h · IFR ${displayHours(dual.ifrHours)} h</small>
       </div>
       <div class="stat">
-        <strong>${stats.landingsTotal}</strong>
-        <span>Landings</span>
-        <small>Day ${stats.landingsDay} · Night ${stats.landingsNight}</small>
+        <strong>${displayHours(night.hours)} h</strong>
+        <span>Night</span>
+        <small>VFR ${displayHours(night.nightVfr)} h · IFR ${displayHours(night.nightIfr)} h</small>
+      </div>
+      <div class="stat">
+        <strong>${displayHours(stats.actualInstrument+stats.simulatedInstrument)} h</strong>
+        <span>Instrument</span>
+        <small>Actual ${displayHours(stats.actualInstrument)} h · Simulated ${displayHours(stats.simulatedInstrument)} h</small>
+      </div>
+      <div class="stat">
+        <strong>${displayHours(instructor.hours)} h</strong>
+        <span>Instructor</span>
+        <small>VFR ${displayHours(instructor.vfrHours)} h · IFR ${displayHours(instructor.ifrHours)} h</small>
+      </div>
+      <div class="stat stats-take-land">
+        <strong>${stats.takeoffsDay+stats.takeoffsNight+stats.landingsDay+stats.landingsNight}</strong>
+        <span>Take-offs / Landings</span>
+        <small>Take-offs: Day ${stats.takeoffsDay} · Night ${stats.takeoffsNight}<br>Landings: Day ${stats.landingsDay} · Night ${stats.landingsNight}</small>
       </div>
     </div>`;
 }

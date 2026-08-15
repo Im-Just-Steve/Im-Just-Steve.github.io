@@ -485,3 +485,20 @@ button.save-action:hover{
 #flightDialog .landings-night{
   min-width:0;
 }
+
+/* v0.55: expanded Statistics bubble layout */
+#statistics .stats-grid-expanded{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+#statistics .stats-grid-expanded .stat{
+  min-height:128px;
+}
+#statistics .stats-grid-expanded .stats-take-land small{
+  line-height:1.6;
+}
+@media (max-width:560px){
+  #statistics .stats-grid-expanded{grid-template-columns:1fr 1fr;gap:10px}
+  #statistics .stats-grid-expanded .stat{min-height:116px;padding:16px}
+  #statistics .stats-grid-expanded .stat strong{font-size:25px}
+}
