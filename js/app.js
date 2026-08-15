@@ -225,11 +225,18 @@ function bindPhysicalLogbook(){
   $("#physicalLogbookInput").addEventListener("change",e=>{physicalAddFiles(e.target.files);e.target.value="";});
   $("#physicalPrev").onclick=()=>{if(physicalIndex>0){physicalIndex--;physicalRender();}};
   $("#physicalNext").onclick=()=>{if(physicalIndex<physicalPages.length-1){physicalIndex++;physicalRender();}};
-  $("#physicalEditBtn").onclick=async()=>{
-    physicalEditMode=!physicalEditMode;
+  $("#physicalStartEditBtn").onclick=async()=>{
+    physicalEditMode=true;
     physicalSelectedIds.clear();
-    $("#physicalEditBtn").textContent=physicalEditMode?"Done":"Edit";
-    $("#physicalEditBtn").classList.toggle("save-action",physicalEditMode);
+    $("#physicalStartEditBtn").classList.add("hidden");
+    $("#physicalEditBtn").classList.remove("hidden");
+    await physicalRender();
+  };
+  $("#physicalEditBtn").onclick=async()=>{
+    physicalEditMode=false;
+    physicalSelectedIds.clear();
+    $("#physicalEditBtn").classList.add("hidden");
+    $("#physicalStartEditBtn").classList.remove("hidden");
     await physicalRender();
   };
   $("#physicalMoveLeft").onclick=()=>physicalReorder(-1);

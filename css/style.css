@@ -587,3 +587,7 @@ button.save-action:hover{
 
 /* v0.62: Edit controls */
 #physicalLogbook #physicalEditBtn.hidden{display:none}
+
+/* v0.63: Physical Log Book edit entry button */
+#physicalLogbook #physicalStartEditBtn.hidden{display:none}
+#physicalLogbook #physicalEditBtn.hidden{display:none}

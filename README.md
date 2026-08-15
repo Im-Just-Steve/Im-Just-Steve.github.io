@@ -154,3 +154,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.61: fixed Physical Log Book and Data & backup initialization after moving ZIP controls to Settings; restored viewer/edit/navigation/delete controls and robust ZIP import errors.
 
 - v0.62: placed Done before Move left in Physical Log Book editing and fixed deletion of the current page when no page is selected.
+
+- v0.63: fixed the Physical Log Book Edit button handler after separating Edit and Done controls.
