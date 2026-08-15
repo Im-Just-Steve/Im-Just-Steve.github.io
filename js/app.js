@@ -253,7 +253,10 @@ function statsGroups(data,mode){
   if(mode==="class") aircraftClasses.forEach(c=>(c.types||[]).forEach(t=>typeToClass.set(String(t).trim().toUpperCase(),c.name)));
   data.forEach(f=>{
     const type=String(f.aircraft||"").trim().toUpperCase();
-    const name=mode==="class"?(typeToClass.get(type)||"Unclassified"):(type||"Unknown");
+    const registration=String(f.registration||"").trim().toUpperCase();
+    const name=mode==="class"?(typeToClass.get(type)||"Unclassified"):
+      mode==="registration"?(registration||"Unknown"):
+      (type||"Unknown");
     (groups[name] ||= []).push(f);
   });
   return Object.entries(groups).map(([name,items])=>items.reduce((a,f)=>{
@@ -294,7 +297,7 @@ function renderStatistics(){
   const groups=statsGroups(data,mode);
   if(!statsSelectedItem||!groups.some(g=>g.name===statsSelectedItem)) statsSelectedItem=groups[0]?.name||null;
   const selected=groups.find(g=>g.name===statsSelectedItem);
-  const title=mode==="class"?"By Class":"By Aircraft";
+  const title=mode==="class"?"By Class":mode==="registration"?"By Registration":"By Aircraft";
 
   $("#statisticsContent").innerHTML=`
     <div class="panel stats-breakdown">
@@ -303,6 +306,7 @@ function renderStatistics(){
           <select id="statsBreakdown">
             <option value="aircraft" ${mode==="aircraft"?"selected":""}>By Aircraft</option>
             <option value="class" ${mode==="class"?"selected":""}>By Class</option>
+            <option value="registration" ${mode==="registration"?"selected":""}>By Registration</option>
           </select>
         </label>
         <label>Role

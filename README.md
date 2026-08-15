@@ -121,3 +121,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 
 - Current app version: v0.46 (Alpha).
 - Statistics Breakdown includes a Role filter for All Roles or P.1 and P.1/s.
+
+- By Registration Statistics breakdown added; each logged registration becomes a selectable button using the existing Aircraft/Class button styling.
