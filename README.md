@@ -158,3 +158,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.63: fixed the Physical Log Book Edit button handler after separating Edit and Done controls.
 
 - v0.64: Physical Log Book delete now requires explicit page selection; button is dimmed when nothing is selected and bright when pages are selected.
+
+- v0.66: Phase 1 physical logbook import workflow with camera/file capture, four-corner perspective crop/straightening, rotation, corrected preview, and optional save to Physical Log Book.

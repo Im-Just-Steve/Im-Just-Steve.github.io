@@ -86,6 +86,7 @@
         </div>
         <div class="section-actions">
           <button class="secondary" type="button" onclick="showView('physicalLogbook')">Physical Log Book</button>
+          <button class="secondary" type="button" onclick="showView('scanLogbook')">Import from Physical Log Book</button>
           <button class="primary add-action" data-action="new-flight">+ Add</button>
         </div>
       </div>
@@ -95,6 +96,62 @@
       </div>
       <div class="panel">
         <div id="allFlights" class="flight-list"></div>
+      </div>
+    </section>
+
+    <section id="scanLogbook" class="view">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">PHASE 1 · PAGE CAPTURE</p>
+          <h2>Import from Physical Log Book</h2>
+          <p class="muted">Capture or choose a page, then crop and perspective-correct it before we extract flight data.</p>
+        </div>
+        <button class="text-btn" type="button" onclick="showView('logbook')">← Logbook</button>
+      </div>
+
+      <div class="panel scan-source-panel" id="scanSourcePanel">
+        <h3>1. Choose a page</h3>
+        <p class="muted">On iPad or iPhone you can use Camera, Photos or Files. On Windows this opens File Explorer.</p>
+        <label class="primary add-action file-btn scan-choose-btn">Choose / Capture Page
+          <input id="scanLogbookInput" type="file" accept="image/*" capture="environment" hidden>
+        </label>
+      </div>
+
+      <div class="panel scan-editor-panel hidden" id="scanEditorPanel">
+        <div class="scan-editor-head">
+          <div>
+            <h3>2. Crop & straighten</h3>
+            <p class="muted">Drag the four corners to the edges of the logbook page. The output will be perspective-corrected to a flat page.</p>
+          </div>
+          <div class="section-actions">
+            <button class="secondary" type="button" id="scanResetBtn">Reset</button>
+            <button class="secondary" type="button" id="scanRotateBtn">Rotate 90°</button>
+          </div>
+        </div>
+
+        <div class="scan-canvas-wrap" id="scanCanvasWrap">
+          <canvas id="scanCanvas"></canvas>
+          <div class="scan-corner" data-corner="0"></div>
+          <div class="scan-corner" data-corner="1"></div>
+          <div class="scan-corner" data-corner="2"></div>
+          <div class="scan-corner" data-corner="3"></div>
+        </div>
+
+        <div class="scan-preview-row">
+          <div>
+            <strong>Preview</strong>
+            <span class="muted">Perspective-corrected page</span>
+          </div>
+          <div class="scan-preview-box">
+            <canvas id="scanPreviewCanvas"></canvas>
+          </div>
+        </div>
+
+        <div class="scan-editor-actions">
+          <button class="secondary" type="button" id="scanChooseAnotherBtn">Choose another page</button>
+          <button class="primary add-action" type="button" id="scanAddPhysicalBtn">Add corrected page to Physical Log Book</button>
+        </div>
+        <p class="muted scan-phase-note">Phase 1 stops here: the corrected page is saved to the Physical Log Book. Flight-data recognition will be added in the next phase.</p>
       </div>
     </section>
 

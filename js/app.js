@@ -264,10 +264,140 @@ function bindPhysicalLogbook(){
   physicalLoad();
 }
 
+
+/* Phase 1: physical logbook page capture, crop and perspective correction */
+let scanImage=null, scanSourceFile=null, scanCorners=[], scanDragIndex=-1, scanRotation=0;
+
+function scanClamp(v,min,max){return Math.max(min,Math.min(max,v));}
+function scanResetCorners(){
+  if(!scanImage)return;
+  const w=scanImage.naturalWidth,h=scanImage.naturalHeight,m=Math.min(w,h)*0.04;
+  scanCorners=[{x:m,y:m},{x:w-m,y:m},{x:w-m,y:h-m},{x:m,y:h-m}];
+}
+function scanRotateSource(){
+  if(!scanImage)return;
+  const c=document.createElement("canvas"),ctx=c.getContext("2d");
+  c.width=scanImage.naturalHeight;c.height=scanImage.naturalWidth;
+  ctx.translate(c.width/2,c.height/2);ctx.rotate(Math.PI/2);
+  ctx.drawImage(scanImage,-scanImage.naturalWidth/2,-scanImage.naturalHeight/2);
+  const rotated=new Image();
+  rotated.onload=()=>{scanImage=rotated;scanResetCorners();scanDraw();};
+  rotated.src=c.toDataURL("image/jpeg",0.96);
+}
+function scanCanvasPoint(e){
+  const c=$("#scanCanvas"),r=c.getBoundingClientRect();
+  return {
+    x:scanClamp((e.clientX-r.left)*(c.width/r.width),0,c.width),
+    y:scanClamp((e.clientY-r.top)*(c.height/r.height),0,c.height)
+  };
+}
+function scanDraw(){
+  if(!scanImage)return;
+  const wrap=$("#scanCanvasWrap"),c=$("#scanCanvas"),ctx=c.getContext("2d");
+  const maxW=Math.max(900,Math.min(1800,wrap.clientWidth||1200));
+  const scale=Math.min(1,maxW/scanImage.naturalWidth);
+  c.width=Math.round(scanImage.naturalWidth*scale);
+  c.height=Math.round(scanImage.naturalHeight*scale);
+  ctx.clearRect(0,0,c.width,c.height);
+  ctx.drawImage(scanImage,0,0,c.width,c.height);
+  scanCorners.forEach((p,i)=>{
+    const el=document.querySelector(`.scan-corner[data-corner="${i}"]`);
+    el.style.left=`${p.x/scanImage.naturalWidth*100}%`;
+    el.style.top=`${p.y/scanImage.naturalHeight*100}%`;
+  });
+  scanUpdatePreview();
+}
+function solve8(A,b){
+  const n=8,M=A.map((r,i)=>r.concat([b[i]]));
+  for(let i=0;i<n;i++){
+    let max=i;for(let r=i+1;r<n;r++)if(Math.abs(M[r][i])>Math.abs(M[max][i]))max=r;
+    [M[i],M[max]]=[M[max],M[i]];
+    if(Math.abs(M[i][i])<1e-10)return null;
+    for(let r=i+1;r<n;r++){const f=M[r][i]/M[i][i];for(let j=i;j<=n;j++)M[r][j]-=f*M[i][j];}
+  }
+  const x=new Array(n);
+  for(let i=n-1;i>=0;i--){let v=M[i][n];for(let j=i+1;j<n;j++)v-=M[i][j]*x[j];x[i]=v/M[i][i];}
+  return x;
+}
+function homography(srcPts,dstW,dstH){
+  const dstPts=[{x:0,y:0},{x:dstW,y:0},{x:dstW,y:dstH},{x:0,y:dstH}],A=[],b=[];
+  srcPts.forEach((p,i)=>{
+    const q=dstPts[i],x=p.x,y=p.y,u=q.x,v=q.y;
+    A.push([x,y,1,0,0,0,-u*x,-u*y]);b.push(u);
+    A.push([0,0,0,x,y,1,-v*x,-v*y]);b.push(v);
+  });
+  return solve8(A,b);
+}
+function scanCorrectedCanvas(){
+  if(!scanImage)return null;
+  const [tl,tr,br,bl]=scanCorners;
+  const top=Math.hypot(tr.x-tl.x,tr.y-tl.y),bottom=Math.hypot(br.x-bl.x,br.y-bl.y);
+  const left=Math.hypot(bl.x-tl.x,bl.y-tl.y),right=Math.hypot(br.x-tr.x,br.y-tr.y);
+  const ratio=Math.max(.35,Math.min(3,(top+bottom)/(left+right)));
+  const maxSide=1800;
+  let outW=1200,outH=Math.round(outW/ratio);
+  if(outH>maxSide){outH=maxSide;outW=Math.round(outH*ratio);}
+  outW=Math.max(600,outW);outH=Math.max(400,outH);
+  const h=homography(scanCorners,outW,outH);if(!h)return null;
+  const out=document.createElement("canvas");out.width=outW;out.height=outH;
+  const octx=out.getContext("2d"),src=scanImage;
+  const data=octx.createImageData(outW,outH),d=data.data;
+  const s=src.naturalWidth,sh=src.naturalHeight;
+  const tmp=document.createElement("canvas");tmp.width=s;tmp.height=sh;
+  const tctx=tmp.getContext("2d");tctx.drawImage(src,0,0);
+  const sd=tctx.getImageData(0,0,s,sh).data;
+  const [a,b,c,d0,e,f,g,h0]=h;
+  for(let y=0;y<outH;y++)for(let x=0;x<outW;x++){
+    const den=g*x+h0*y+1;
+    const sx=(a*x+b*y+c)/den,sy=(d0*x+e*y+f)/den;
+    const ix=Math.round(sx),iy=Math.round(sy),di=(y*outW+x)*4;
+    if(ix>=0&&ix<s&&iy>=0&&iy<sh){const si=(iy*s+ix)*4;d[di]=sd[si];d[di+1]=sd[si+1];d[di+2]=sd[si+2];d[di+3]=255;}
+  }
+  octx.putImageData(data,0,0);return out;
+}
+function scanUpdatePreview(){
+  const out=scanCorrectedCanvas(),p=$("#scanPreviewCanvas");
+  if(!out||!p)return;
+  const maxW=700,maxH=420,scale=Math.min(1,maxW/out.width,maxH/out.height);
+  p.width=Math.round(out.width*scale);p.height=Math.round(out.height*scale);
+  p.getContext("2d").drawImage(out,0,0,p.width,p.height);
+}
+async function scanAddToPhysical(){
+  const out=scanCorrectedCanvas();if(!out)return;
+  const blob=await new Promise(r=>out.toBlob(r,"image/jpeg",.94));
+  const page=physicalFileToPage(new File([blob],"physical-logbook-page.jpg",{type:"image/jpeg"}),physicalPages.length);
+  await physicalPut(page);await physicalLoad();toast("Corrected page added to Physical Log Book");
+  showView("physicalLogbook");
+}
+function bindScanLogbook(){
+  $("#scanLogbookInput").addEventListener("change",e=>{
+    const file=e.target.files?.[0];e.target.value="";if(!file)return;
+    const url=URL.createObjectURL(file),img=new Image();
+    img.onload=()=>{URL.revokeObjectURL(url);scanImage=img;scanSourceFile=file;scanRotation=0;scanResetCorners();
+      $("#scanSourcePanel").classList.add("hidden");$("#scanEditorPanel").classList.remove("hidden");scanDraw();};
+    img.src=url;
+  });
+  $("#scanResetBtn").onclick=()=>{scanResetCorners();scanDraw();};
+  $("#scanRotateBtn").onclick=scanRotateSource;
+  $("#scanChooseAnotherBtn").onclick=()=>{$("#scanEditorPanel").classList.add("hidden");$("#scanSourcePanel").classList.remove("hidden");scanImage=null;};
+  $("#scanAddPhysicalBtn").onclick=scanAddToPhysical;
+  document.querySelectorAll(".scan-corner").forEach(el=>{
+    el.addEventListener("pointerdown",e=>{e.preventDefault();scanDragIndex=Number(el.dataset.corner);el.setPointerCapture(e.pointerId);});
+    el.addEventListener("pointermove",e=>{
+      if(scanDragIndex<0||!scanImage)return;
+      const p=scanCanvasPoint(e);scanCorners[scanDragIndex]={x:p.x,y:p.y};scanDraw();
+    });
+    el.addEventListener("pointerup",()=>{scanDragIndex=-1;});
+    el.addEventListener("pointercancel",()=>{scanDragIndex=-1;});
+  });
+  window.addEventListener("resize",()=>{if(scanImage)scanDraw();});
+}
+
 document.addEventListener("DOMContentLoaded", async ()=>{
   bindNavigation();
   bindDialog();
   bindPhysicalLogbook();
+  bindScanLogbook();
   setupCompactInputs();
   $("#search").addEventListener("input",renderLogbook);
   $("#yearFilter").addEventListener("change",renderLogbook);
