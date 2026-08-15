@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     if(item){statsSelectedItem=item.dataset.statsItem;renderStatistics();}
   });
   document.addEventListener("change",e=>{
-    if(e.target.id==="statsBreakdown"){
+    if(e.target.id==="statsBreakdown"||e.target.id==="statsRoleFilter"){
       statsSelectedItem=null;
       renderStatistics();
     }
@@ -277,6 +277,9 @@ function renderStatistics(){
     if(from&&to){data=flights.filter(f=>f.date>=from&&f.date<=to);rangeLabel=`${formatDate(from)} – ${formatDate(to)}`;}
     else {data=[];rangeLabel="Choose a start and end date";}
   }
+
+  const roleFilter=$("#statsRoleFilter")?.value||"all";
+  if(roleFilter==="pic") data=data.filter(f=>f.role==="P.1"||f.role==="P.1/S");
 
   const totalTime=sumRoundedHours(data);
   const picTime=sumRoundedHours(data.filter(f=>f.role==="P.1"||f.role==="P.1/S"));

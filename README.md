@@ -118,3 +118,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v44 darkened Save/Delete colours; Add Class uses the shared blue add theme; aircraft-type remove and Pilot Role help controls are compact circular buttons.
 
 - v45 made the Pilot Role help and aircraft-type remove controls smaller and circular, added spacing beside the Pilot Role label, and explicitly applied Add/Save semantic colours to Add Class and Save Flight.
+
+- v46 adds a visible Role dropdown beside Breakdown with All Roles and P.1 and P.1/s filtering.

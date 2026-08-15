@@ -410,3 +410,22 @@ button.save-action:hover{
   border-color:#86b894 !important;
   color:#194927 !important;
 }
+
+/* v46 fixed: ensure both Breakdown controls are visible side-by-side */
+#statistics .stats-breakdown-controls{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  flex-wrap:wrap;
+}
+#statistics .stats-breakdown-controls label{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+#statistics .stats-breakdown-controls select{
+  display:block;
+  visibility:visible;
+  opacity:1;
+  margin:0;
+}
