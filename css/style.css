@@ -576,3 +576,11 @@ button.save-action:hover{
 .data-backup-danger{
   border:1px solid rgba(190,70,70,.28);
 }
+
+/* v0.61: keep Physical Log Book controls above the viewer hit area */
+#physicalLogbook .physical-editbar,
+#physicalLogbook .physical-bottom-bar,
+#physicalLogbook .physical-actions{
+  position:relative;
+  z-index:5;
+}

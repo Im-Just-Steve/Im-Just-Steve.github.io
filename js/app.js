@@ -187,27 +187,42 @@ async function physicalExportZip(){
 function readU16(a,p){return a[p]|a[p+1]<<8}
 function readU32(a,p){return (a[p]|a[p+1]<<8|a[p+2]<<16|a[p+3]<<24)>>>0}
 async function physicalImportZip(file){
-  const a=new Uint8Array(await file.arrayBuffer()),items=[];
-  let p=0;
-  while(p+30<=a.length && readU32(a,p)===0x04034b50){
-    const method=readU16(a,p+8),comp=readU32(a,p+18),size=readU32(a,p+22),nl=readU16(a,p+26),xl=readU16(a,p+28);
-    const name=new TextDecoder().decode(a.slice(p+30,p+30+nl)),start=p+30+nl+xl,raw=a.slice(start,start+comp);
-    const bytes=method===8?await inflateRaw(raw):raw;
-    if(name.match(/^page-\d+\./i))items.push({name,bytes});
-    p=start+comp;
+  try{
+    const a=new Uint8Array(await file.arrayBuffer()),items=[];
+    let p=0;
+    while(p+30<=a.length && readU32(a,p)===0x04034b50){
+      const flags=readU16(a,p+6);
+      if(flags&0x08) throw new Error("ZIP data descriptors are not supported");
+      const method=readU16(a,p+8),comp=readU32(a,p+18),size=readU32(a,p+22),nl=readU16(a,p+26),xl=readU16(a,p+28);
+      const name=new TextDecoder().decode(a.slice(p+30,p+30+nl));
+      const startData=p+30+nl+xl;
+      const raw=a.slice(startData,startData+comp);
+      let bytes;
+      if(method===8) bytes=await inflateRaw(raw);
+      else if(method===0) bytes=raw;
+      else throw new Error("Unsupported ZIP compression");
+      if(bytes.length!==size) throw new Error("Invalid ZIP entry");
+      if(/^page-\d+\.(jpg|jpeg|png|webp)$/i.test(name))items.push({name,bytes});
+      p=startData+comp;
+    }
+    if(!items.length)throw new Error("No physical log book pages were found in this ZIP.");
+    items.sort((a,b)=>a.name.localeCompare(b.name,navigator.language,{numeric:true}));
+    let order=physicalPages.length;
+    for(const item of items){
+      const ext=(item.name.split(".").pop()||"jpg").toLowerCase();
+      const type=ext==="png"?"image/png":ext==="webp"?"image/webp":"image/jpeg";
+      await physicalPut({id:crypto.randomUUID(),order:order++,name:item.name,type,blob:new Blob([item.bytes],{type}),addedAt:Date.now()});
+    }
+    await physicalLoad();
+    toast(`${items.length} physical log book page${items.length===1?"":"s"} imported`);
+  }catch(err){
+    console.error("Physical log book ZIP import failed",err);
+    alert(`Could not import the physical log book ZIP. ${err.message||"The file may be invalid or unsupported."}`);
   }
-  if(!items.length){alert("No physical log book pages were found in this ZIP.");return;}
-  items.sort((a,b)=>a.name.localeCompare(b.name));
-  let order=physicalPages.length;
-  for(const item of items){
-    const ext=(item.name.split(".").pop()||"jpg").toLowerCase(),type=ext==="png"?"image/png":ext==="webp"?"image/webp":"image/jpeg";
-    await physicalPut({id:crypto.randomUUID(),order:order++,name:item.name,type,blob:new Blob([item.bytes],{type}),addedAt:Date.now()});
-  }
-  await physicalLoad();toast(`${items.length} physical log book page${items.length===1?"":"s"} imported`);
 }
+
 function bindPhysicalLogbook(){
   $("#physicalLogbookInput").addEventListener("change",e=>{physicalAddFiles(e.target.files);e.target.value="";});
-  $("#physicalImportInput").addEventListener("change",e=>{if(e.target.files[0])physicalImportZip(e.target.files[0]);e.target.value="";});
   $("#physicalPrev").onclick=()=>{if(physicalIndex>0){physicalIndex--;physicalRender();}};
   $("#physicalNext").onclick=()=>{if(physicalIndex<physicalPages.length-1){physicalIndex++;physicalRender();}};
   $("#physicalEditBtn").onclick=async()=>{
