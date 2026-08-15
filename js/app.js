@@ -86,7 +86,14 @@ function bindNavigation(){
   document.querySelectorAll("[data-action='new-flight']").forEach(b=>b.addEventListener("click",()=>openDialog()));
 }
 
+function updateFlightRulesFields(){
+  const mixed=$("#flightType").value==="VFR + IFR";
+  $("#vfrMinutesField").classList.toggle("hidden",!mixed);
+  $("#ifrMinutesField").classList.toggle("hidden",!mixed);
+}
+
 function bindDialog(){
+  $("#flightType").addEventListener("change",updateFlightRulesFields);
   $("#closeDialog").onclick=()=>$("#flightDialog").close();
   $("#cancelDialog").onclick=()=>$("#flightDialog").close();
   $("#deleteFlight").onclick=async()=>{
@@ -107,7 +114,10 @@ function bindDialog(){
       arrival:$("#arrival").value.trim().toUpperCase(),departTime:depart, arrivalTime:arrival,
       blockMinutes:calculateDuration(depart,arrival),
       role:$("#role").value,flightType:$("#flightType").value,nightMinutes:num("nightMinutes"),
-      instrumentMinutes:num("instrumentMinutes"),
+      vfrMinutes:num("vfrMinutes"),ifrMinutes:num("ifrMinutes"),
+      instrumentMinutes:num("instrumentMinutesActual"),
+      instrumentMinutesActual:num("instrumentMinutesActual"),
+      instrumentMinutesSimulated:num("instrumentMinutesSimulated"),
       takeoffsDay:num("takeoffsDay"),takeoffsNight:num("takeoffsNight"),
       landingsDay:num("landingsDay"),landingsNight:num("landingsNight"),
       takeoffs:num("takeoffsDay")+num("takeoffsNight"),
@@ -139,7 +149,11 @@ function openDialog(f=null){
   $("#role").value=f?.role||"PIC";
   $("#flightType").value=f?.flightType||"VFR";
   $("#nightMinutes").value=f?.nightMinutes??0;
-  $("#instrumentMinutes").value=f?.instrumentMinutes??0;
+  $("#vfrMinutes").value=f?.vfrMinutes??0;
+  $("#ifrMinutes").value=f?.ifrMinutes??0;
+  $("#instrumentMinutesActual").value=f?.instrumentMinutesActual??f?.instrumentMinutes??0;
+  $("#instrumentMinutesSimulated").value=f?.instrumentMinutesSimulated??0;
+  updateFlightRulesFields();
   const oldTakeoffs=Number(f?.takeoffs)||0;
   const oldLandings=Number(f?.landings)||0;
   $("#takeoffsDay").value=f?.takeoffsDay!=null?f.takeoffsDay:(f?oldTakeoffs:1);
@@ -330,9 +344,17 @@ function renderStatistics(){
   const aggregate=list=>list.reduce((a,f)=>{
     const n=getDayNightCounts(f),hours=entryHours(Number(f.blockMinutes)||0);
     a.hours+=hours;
-    if(String(f.flightType||"").toUpperCase()==="IFR") a.ifrHours+=hours;
-    else a.vfrHours+=hours;
-    a.instrumentHours+=entryHours(Number(f.instrumentMinutes)||0);
+    const rules=String(f.flightType||"VFR").toUpperCase();
+    if(rules==="VFR + IFR"){
+      a.vfrHours+=entryHours(Number(f.vfrMinutes)||0);
+      a.ifrHours+=entryHours(Number(f.ifrMinutes)||0);
+    }else if(rules==="IFR"){
+      a.ifrHours+=hours;
+    }else{
+      a.vfrHours+=hours;
+    }
+    a.instrumentHours+=entryHours(Number(f.instrumentMinutesActual??f.instrumentMinutes)||0);
+    a.instrumentHours+=entryHours(Number(f.instrumentMinutesSimulated)||0);
     a.takeoffsDay+=n.takeoffsDay;a.takeoffsNight+=n.takeoffsNight;a.takeoffsTotal+=n.takeoffsTotal;
     a.landingsDay+=n.landingsDay;a.landingsNight+=n.landingsNight;a.landingsTotal+=n.landingsTotal;
     return a;
