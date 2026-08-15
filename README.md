@@ -170,3 +170,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.70: Phase 2 Pooleys page structure detection with mapped flight rows and entry fields; no flight data is created at this stage.
 
 - v0.71: fixed Phase 1 crop-handle dragging on iPad/iOS with document-level pointer tracking and an explicit touch-event fallback.
+
+- v0.72: fixed iOS crop-handle offset/jumping by mapping touch coordinates to the source image's natural pixels and preventing duplicate PointerEvent/touch handling.

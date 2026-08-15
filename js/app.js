@@ -286,9 +286,14 @@ function scanRotateSource(){
 }
 function scanCanvasPoint(e){
   const c=$("#scanCanvas"),r=c.getBoundingClientRect();
+  // scanCorners are stored in the original image's natural pixel coordinates.
+  // c.width/c.height are deliberately scaled down for display, so using them
+  // here causes an iOS-only-looking jump/offset after the first touch.
+  const naturalW=scanImage?.naturalWidth||c.width;
+  const naturalH=scanImage?.naturalHeight||c.height;
   return {
-    x:scanClamp((e.clientX-r.left)*(c.width/r.width),0,c.width),
-    y:scanClamp((e.clientY-r.top)*(c.height/r.height),0,c.height)
+    x:scanClamp((e.clientX-r.left)*(naturalW/r.width),0,naturalW),
+    y:scanClamp((e.clientY-r.top)*(naturalH/r.height),0,naturalH)
   };
 }
 function scanDraw(){
@@ -573,6 +578,10 @@ function bindScanLogbook(){
   const scanStartDrag=e=>{
     const el=e.target.closest(".scan-corner");
     if(!el)return;
+    // Ignore touch PointerEvents because iOS also receives our explicit
+    // touch fallback below. This prevents the same finger from being handled
+    // twice and producing a jump.
+    if(e.pointerType==="touch")return;
     e.preventDefault();
     scanDragIndex=Number(el.dataset.corner);
     if(e.pointerId!==undefined && el.setPointerCapture){
@@ -581,10 +590,9 @@ function bindScanLogbook(){
   };
   const scanMoveDrag=e=>{
     if(scanDragIndex<0||!scanImage)return;
+    if(e.pointerType==="touch")return;
     if(e.cancelable)e.preventDefault();
-    const pointEvent=e.touches?e.touches[0]:e;
-    if(!pointEvent)return;
-    const p=scanCanvasPoint(pointEvent);
+    const p=scanCanvasPoint(e);
     scanCorners[scanDragIndex]={x:p.x,y:p.y};
     scanDraw();
   };
@@ -597,8 +605,21 @@ function bindScanLogbook(){
   document.addEventListener("pointercancel",scanEndDrag,{passive:false});
   // Explicit touch fallback for iOS versions/webviews where Pointer Events
   // don't deliver continuous movement reliably.
-  document.addEventListener("touchstart",scanStartDrag,{passive:false});
-  document.addEventListener("touchmove",scanMoveDrag,{passive:false});
+  document.addEventListener("touchstart",e=>{
+    const el=e.target.closest(".scan-corner");
+    if(!el)return;
+    e.preventDefault();
+    scanDragIndex=Number(el.dataset.corner);
+  },{passive:false});
+  document.addEventListener("touchmove",e=>{
+    if(scanDragIndex<0||!scanImage)return;
+    e.preventDefault();
+    const t=e.touches[0];
+    if(!t)return;
+    const p=scanCanvasPoint(t);
+    scanCorners[scanDragIndex]={x:p.x,y:p.y};
+    scanDraw();
+  },{passive:false});
   document.addEventListener("touchend",scanEndDrag,{passive:false});
   document.addEventListener("touchcancel",scanEndDrag,{passive:false});
   window.addEventListener("resize",()=>{
