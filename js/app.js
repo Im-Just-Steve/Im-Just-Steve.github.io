@@ -95,7 +95,12 @@ async function physicalRender(){
   wrap.classList.toggle("hidden",!has);
   $("#physicalEditbar").classList.toggle("hidden",!has||!physicalEditMode);
   const deleteBtn=$("#physicalRemove");
-  if(deleteBtn) deleteBtn.textContent=physicalSelectedIds.size>1?`Delete ${physicalSelectedIds.size} Pages`:"Delete Page";
+  if(deleteBtn){
+    const selectedCount=physicalSelectedIds.size;
+    deleteBtn.textContent=selectedCount>1?`Delete ${selectedCount} Pages`:"Delete Page";
+    deleteBtn.disabled=selectedCount===0;
+    deleteBtn.setAttribute("aria-disabled",selectedCount===0?"true":"false");
+  }
   if(!has){
     indicator.textContent="No pages";
     $("#physicalPrev").disabled=true;$("#physicalNext").disabled=true;

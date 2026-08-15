@@ -156,3 +156,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.62: placed Done before Move left in Physical Log Book editing and fixed deletion of the current page when no page is selected.
 
 - v0.63: fixed the Physical Log Book Edit button handler after separating Edit and Done controls.
+
+- v0.64: Physical Log Book delete now requires explicit page selection; button is dimmed when nothing is selected and bright when pages are selected.

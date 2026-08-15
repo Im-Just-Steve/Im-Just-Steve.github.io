@@ -591,3 +591,14 @@ button.save-action:hover{
 /* v0.63: Physical Log Book edit entry button */
 #physicalLogbook #physicalStartEditBtn.hidden{display:none}
 #physicalLogbook #physicalEditBtn.hidden{display:none}
+
+/* v0.64: Physical Log Book delete button is inactive until pages are selected */
+#physicalLogbook #physicalRemove:disabled{
+  opacity:.38;
+  cursor:not-allowed;
+  filter:saturate(.45);
+}
+#physicalLogbook #physicalRemove:not(:disabled){
+  opacity:1;
+  cursor:pointer;
+}
