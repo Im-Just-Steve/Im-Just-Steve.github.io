@@ -146,3 +146,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.57: expanded Home overview to Total Hours, PIC Hours, Dual Hours, Night Hours, Instrument Hours, Instructor Hours, Take-offs, and Landings; fixed take-off/landing overview totals to use day/night fields.
 
 - v0.58: added Physical Log Book page with image import, page navigation, edit/reorder/delete controls, IndexedDB storage, and ZIP backup/restore.
+
+- v0.59: Physical Log Book Edit uses save styling for Done, adds spacing around edit controls, and supports selecting multiple pages for deletion.

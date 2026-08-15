@@ -536,3 +536,25 @@ button.save-action:hover{
   .physical-page-wrap{height:55vh}
   .physical-bottom-bar{gap:14px}
 }
+
+/* v0.59: Physical Log Book multi-select editing */
+#physicalLogbook .physical-editbar{
+  margin-top:18px;
+  padding-top:4px;
+  gap:10px;
+}
+#physicalLogbook .physical-actions{
+  margin-top:10px;
+}
+#physicalLogbook .physical-page-wrap{
+  cursor:default;
+}
+#physicalLogbook .physical-page-wrap.physical-page-selected img{
+  outline:4px solid var(--accent);
+  outline-offset:4px;
+}
+#physicalLogbook .save-action{
+  background:var(--success);
+  border-color:var(--success);
+  color:#fff;
+}

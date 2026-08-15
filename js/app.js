@@ -28,6 +28,7 @@ const PHYSICAL_STORE="pages";
 let physicalPages=[];
 let physicalIndex=0;
 let physicalEditMode=false;
+let physicalSelectedIds=new Set();
 let physicalObjectUrl=null;
 
 function physicalDB(){
@@ -84,6 +85,8 @@ async function physicalRender(){
   empty.classList.toggle("hidden",has);
   wrap.classList.toggle("hidden",!has);
   $("#physicalEditbar").classList.toggle("hidden",!has||!physicalEditMode);
+  const deleteBtn=$("#physicalRemove");
+  if(deleteBtn) deleteBtn.textContent=physicalSelectedIds.size>1?`Delete ${physicalSelectedIds.size} Pages`:"Delete Page";
   if(!has){
     indicator.textContent="No pages";
     $("#physicalPrev").disabled=true;$("#physicalNext").disabled=true;
@@ -99,6 +102,7 @@ async function physicalRender(){
   physicalObjectUrl=URL.createObjectURL(physicalPages[physicalIndex].blob);
   img.src=physicalObjectUrl;
   img.alt=`Physical log book page ${physicalIndex+1}`;
+  wrap.classList.toggle("physical-page-selected",physicalSelectedIds.has(physicalPages[physicalIndex].id));
 }
 async function physicalReorder(delta){
   const j=physicalIndex+delta;
@@ -110,14 +114,19 @@ async function physicalReorder(delta){
 }
 async function physicalRemove(){
   if(!physicalPages.length)return;
-  if(!confirm(`Delete physical log book page ${physicalIndex+1}?`))return;
-  await physicalDelete(physicalPages[physicalIndex].id);
-  physicalPages.splice(physicalIndex,1);
+  const selected=physicalSelectedIds.size?physicalPages.filter(p=>physicalSelectedIds.has(p.id)):[physicalPages[physicalIndex]];
+  const count=selected.length;
+  if(!confirm(`Delete ${count} physical log book page${count===1?"":"s"}?`))return;
+  for(const p of selected)await physicalDelete(p.id);
+  physicalPages=physicalPages.filter(p=>!physicalSelectedIds.has(p.id));
   physicalPages.forEach((p,i)=>p.order=i);
   for(const p of physicalPages)await physicalPut(p);
+  physicalSelectedIds.clear();
   physicalIndex=Math.min(physicalIndex,Math.max(0,physicalPages.length-1));
-  await physicalRender();toast("Page deleted");
+  await physicalRender();
+  toast(`${count} page${count===1?"":"s"} deleted`);
 }
+
 function crc32(bytes){
   let c=0xffffffff;
   for(const b of bytes){c^=b;for(let k=0;k<8;k++)c=(c>>>1)^((c&1)?0xedb88320:0);}
@@ -192,10 +201,23 @@ function bindPhysicalLogbook(){
   $("#physicalImportInput").addEventListener("change",e=>{if(e.target.files[0])physicalImportZip(e.target.files[0]);e.target.value="";});
   $("#physicalPrev").onclick=()=>{if(physicalIndex>0){physicalIndex--;physicalRender();}};
   $("#physicalNext").onclick=()=>{if(physicalIndex<physicalPages.length-1){physicalIndex++;physicalRender();}};
-  $("#physicalEditBtn").onclick=async()=>{physicalEditMode=!physicalEditMode;$("#physicalEditBtn").textContent=physicalEditMode?"Done":"Edit";await physicalRender();};
+  $("#physicalEditBtn").onclick=async()=>{
+    physicalEditMode=!physicalEditMode;
+    physicalSelectedIds.clear();
+    $("#physicalEditBtn").textContent=physicalEditMode?"Done":"Edit";
+    $("#physicalEditBtn").classList.toggle("save-action",physicalEditMode);
+    await physicalRender();
+  };
   $("#physicalMoveLeft").onclick=()=>physicalReorder(-1);
   $("#physicalMoveRight").onclick=()=>physicalReorder(1);
   $("#physicalRemove").onclick=physicalRemove;
+  $("#physicalPageImageWrap").addEventListener("click",()=>{
+    if(!physicalEditMode||!physicalPages.length)return;
+    const id=physicalPages[physicalIndex].id;
+    if(physicalSelectedIds.has(id)) physicalSelectedIds.delete(id);
+    else physicalSelectedIds.add(id);
+    physicalRender();
+  });
   $("#physicalExportBtn").onclick=physicalExportZip;
   physicalLoad();
 }
