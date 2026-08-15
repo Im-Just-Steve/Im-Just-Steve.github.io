@@ -184,10 +184,32 @@ function sumRoundedHours(list, field="blockMinutes"){
 function displayHours(value){return value.toFixed(1)}
 function total(field){return flights.reduce((s,f)=>s+(Number(f[field])||0),0)}
 function renderStats(){
-  const totalRounded=sumRoundedHours(flights), picRounded=sumRoundedHours(flights.filter(f=>f.role==="P.1" || f.role==="P.1/S" || f.role==="P.1 (Instructor)"));
-  const totalMin=total("blockMinutes"), pic=flights.filter(f=>f.role==="P.1" || f.role==="P.1/S" || f.role==="P.1 (Instructor)").reduce((s,f)=>s+f.blockMinutes,0);
+  const totalHours=sumRoundedHours(flights);
+  const picFlights=flights.filter(f=>f.role==="P.1"||f.role==="P.1/S"||f.role==="P.1 (Instructor)");
+  const dualFlights=flights.filter(f=>f.role==="P.U/T");
+  const instructorFlights=flights.filter(f=>f.role==="P.1 (Instructor)");
+  const picHours=sumRoundedHours(picFlights);
+  const dualHours=sumRoundedHours(dualFlights);
+  const nightHours=sumRoundedHours(flights,"nightMinutes");
+  const actualInstrumentHours=sumRoundedHours(flights,"instrumentMinutesActual");
+  const legacyInstrumentHours=flights.some(f=>f.instrumentMinutesActual!=null)?0:sumRoundedHours(flights,"instrumentMinutes");
+  const simulatedInstrumentHours=sumRoundedHours(flights,"instrumentMinutesSimulated");
+  const instrumentHours=actualInstrumentHours+legacyInstrumentHours+simulatedInstrumentHours;
+  const instructorHours=sumRoundedHours(instructorFlights);
+  const takeoffsDay=total("takeoffsDay"), takeoffsNight=total("takeoffsNight");
+  const landingsDay=total("landingsDay"), landingsNight=total("landingsNight");
+  const takeoffs=takeoffsDay+takeoffsNight || total("takeoffs");
+  const landings=landingsDay+landingsNight || total("landings");
+
   $("#stats").innerHTML=[
-    ["Total time",displayHours(totalRounded)+" h"],["PIC",displayHours(picRounded)+" h"],["Night",displayHours(sumRoundedHours(flights,"nightMinutes"))+" h"],["Take-offs",total("takeoffs")],["Landings",total("landings")]
+    ["Total Hours",displayHours(totalHours)+" h"],
+    ["PIC Hours",displayHours(picHours)+" h"],
+    ["Dual Hours",displayHours(dualHours)+" h"],
+    ["Night Hours",displayHours(nightHours)+" h"],
+    ["Instrument Hours",displayHours(instrumentHours)+" h"],
+    ["Instructor Hours",displayHours(instructorHours)+" h"],
+    ["Take-offs",takeoffs],
+    ["Landings",landings]
   ].map(x=>`<div class="stat"><strong>${x[1]}</strong><span>${x[0]}</span></div>`).join("");
 }
 function flightHTML(f){
