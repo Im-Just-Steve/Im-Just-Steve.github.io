@@ -823,3 +823,8 @@ button.save-action:hover{
 }
 .scan-magnifier-crosshair::before{width:2px;height:26px;left:6px;top:-6px}
 .scan-magnifier-crosshair::after{height:2px;width:26px;left:-6px;top:6px}
+
+/* v0.74: easier inset handles and improved iOS magnifier */
+.scan-corner{width:32px;height:32px;z-index:40;-webkit-transform:translate(-50%,-50%);transform:translate(-50%,-50%)}
+.scan-magnifier{z-index:60;-webkit-transform:translateZ(0);transform:translateZ(0);will-change:left,top;-webkit-backface-visibility:hidden;backface-visibility:hidden}
+.scan-magnifier canvas{-webkit-transform:translateZ(0);transform:translateZ(0)}

@@ -174,3 +174,7 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.72: fixed iOS crop-handle offset/jumping by mapping touch coordinates to the source image's natural pixels and preventing duplicate PointerEvent/touch handling.
 
 - v0.73: inset Phase 1 crop handles slightly for easier grabbing, enlarged their touch target, and added a live magnified precision view while dragging.
+
+- v0.74: inset crop handles further, improved iOS magnifier rendering, and removed duplicate lower Add to Physical Log Book button.
+
+- v0.75: moved initial crop handles further toward the centre on both axes and restored their previous size.

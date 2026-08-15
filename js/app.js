@@ -272,7 +272,7 @@ function scanClamp(v,min,max){return Math.max(min,Math.min(max,v));}
 function scanResetCorners(){
   if(!scanImage)return;
   const w=scanImage.naturalWidth,h=scanImage.naturalHeight;
-  const inset=Math.min(w,h)*0.025;
+  const inset=Math.min(w,h)*0.075;
   scanCorners=[
     {x:inset,y:inset},
     {x:w-inset,y:inset},
