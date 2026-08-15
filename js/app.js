@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     if(item){statsSelectedItem=item.dataset.statsItem;renderStatistics();}
   });
   document.addEventListener("change",e=>{
-    if(e.target.id==="statsBreakdown"||e.target.id==="statsRoleFilter"){
+    if(e.target.id==="statsBreakdown"||e.target.id==="statsRoleFilter"||e.target.id==="statsDayNightFilter"){
       statsSelectedItem=null;
       renderStatistics();
     }
@@ -300,6 +300,10 @@ function renderStatistics(){
   const roleFilter=$("#statsRoleFilter")?.value||"all";
   if(roleFilter==="pic") data=data.filter(f=>f.role==="P.1"||f.role==="P.1/S");
 
+  const dayNightFilter=$("#statsDayNightFilter")?.value||"all";
+  if(dayNightFilter==="day") data=data.filter(f=>getDayNightCounts(f).takeoffsDay>0||getDayNightCounts(f).landingsDay>0);
+  if(dayNightFilter==="night") data=data.filter(f=>getDayNightCounts(f).takeoffsNight>0||getDayNightCounts(f).landingsNight>0);
+
   const totalTime=sumRoundedHours(data);
   const picTime=sumRoundedHours(data.filter(f=>f.role==="P.1"||f.role==="P.1/S"));
   const nightTime=sumRoundedHours(data,"nightMinutes");
@@ -329,6 +333,13 @@ function renderStatistics(){
           <select id="statsRoleFilter">
             <option value="all" ${roleFilter==="all"?"selected":""}>All Roles</option>
             <option value="pic" ${roleFilter==="pic"?"selected":""}>P.1 and P.1/s</option>
+          </select>
+        </label>
+        <label>Time
+          <select id="statsDayNightFilter">
+            <option value="all" ${dayNightFilter==="all"?"selected":""}>All</option>
+            <option value="day" ${dayNightFilter==="day"?"selected":""}>Day</option>
+            <option value="night" ${dayNightFilter==="night"?"selected":""}>Night</option>
           </select>
         </label>
       </div>
