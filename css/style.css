@@ -632,3 +632,52 @@ button.save-action:hover{
   .scan-editor-actions{justify-content:stretch}
   .scan-editor-actions button{flex:1}
 }
+
+/* v0.67: Phase 1 scan editor — maximize the corrected page in the viewer */
+.scan-editor-panel{
+  padding:0;
+  overflow:hidden;
+}
+.scan-editor-panel .scan-editor-head{
+  padding:20px 20px 14px;
+}
+.scan-canvas-wrap{
+  width:100%;
+  margin:0;
+  border-radius:0;
+  background:#05080d;
+}
+#scanCanvas{
+  width:100%;
+  max-height:none;
+  object-fit:contain;
+}
+.scan-preview-row{
+  display:none;
+}
+.scan-editor-actions{
+  padding:18px 20px 20px;
+  margin-top:0;
+  align-items:center;
+  justify-content:flex-end;
+  background:var(--surface);
+}
+.scan-phase-note{
+  padding:0 20px 18px;
+  margin:0;
+}
+.scan-corner{
+  width:22px;
+  height:22px;
+}
+@media(max-width:650px){
+  .scan-editor-panel .scan-editor-head{
+    padding:16px;
+  }
+  .scan-editor-actions{
+    padding:14px 16px 16px;
+  }
+  .scan-phase-note{
+    padding:0 16px 14px;
+  }
+}

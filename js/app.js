@@ -271,8 +271,8 @@ let scanImage=null, scanSourceFile=null, scanCorners=[], scanDragIndex=-1, scanR
 function scanClamp(v,min,max){return Math.max(min,Math.min(max,v));}
 function scanResetCorners(){
   if(!scanImage)return;
-  const w=scanImage.naturalWidth,h=scanImage.naturalHeight,m=Math.min(w,h)*0.04;
-  scanCorners=[{x:m,y:m},{x:w-m,y:m},{x:w-m,y:h-m},{x:m,y:h-m}];
+  const w=scanImage.naturalWidth,h=scanImage.naturalHeight;
+  scanCorners=[{x:0,y:0},{x:w,y:0},{x:w,y:h},{x:0,y:h}];
 }
 function scanRotateSource(){
   if(!scanImage)return;
@@ -379,7 +379,6 @@ function bindScanLogbook(){
   });
   $("#scanResetBtn").onclick=()=>{scanResetCorners();scanDraw();};
   $("#scanRotateBtn").onclick=scanRotateSource;
-  $("#scanChooseAnotherBtn").onclick=()=>{$("#scanEditorPanel").classList.add("hidden");$("#scanSourcePanel").classList.remove("hidden");scanImage=null;};
   $("#scanAddPhysicalBtn").onclick=scanAddToPhysical;
   document.querySelectorAll(".scan-corner").forEach(el=>{
     el.addEventListener("pointerdown",e=>{e.preventDefault();scanDragIndex=Number(el.dataset.corner);el.setPointerCapture(e.pointerId);});

@@ -160,3 +160,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.64: Physical Log Book delete now requires explicit page selection; button is dimmed when nothing is selected and bright when pages are selected.
 
 - v0.66: Phase 1 physical logbook import workflow with camera/file capture, four-corner perspective crop/straightening, rotation, corrected preview, and optional save to Physical Log Book.
+
+- v0.67: Phase 1 scan editor now processes one page at a time, removes Choose another page, fills the viewer with the image, and starts crop handles at the image corners.
