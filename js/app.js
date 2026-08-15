@@ -184,8 +184,8 @@ function sumRoundedHours(list, field="blockMinutes"){
 function displayHours(value){return value.toFixed(1)}
 function total(field){return flights.reduce((s,f)=>s+(Number(f[field])||0),0)}
 function renderStats(){
-  const totalRounded=sumRoundedHours(flights), picRounded=sumRoundedHours(flights.filter(f=>f.role==="P.1" || f.role==="P.1/S"));
-  const totalMin=total("blockMinutes"), pic=flights.filter(f=>f.role==="P.1" || f.role==="P.1/S").reduce((s,f)=>s+f.blockMinutes,0);
+  const totalRounded=sumRoundedHours(flights), picRounded=sumRoundedHours(flights.filter(f=>f.role==="P.1" || f.role==="P.1/S" || f.role==="P.1 (Instructor)"));
+  const totalMin=total("blockMinutes"), pic=flights.filter(f=>f.role==="P.1" || f.role==="P.1/S" || f.role==="P.1 (Instructor)").reduce((s,f)=>s+f.blockMinutes,0);
   $("#stats").innerHTML=[
     ["Total time",displayHours(totalRounded)+" h"],["PIC",displayHours(picRounded)+" h"],["Night",displayHours(sumRoundedHours(flights,"nightMinutes"))+" h"],["Take-offs",total("takeoffs")],["Landings",total("landings")]
   ].map(x=>`<div class="stat"><strong>${x[1]}</strong><span>${x[0]}</span></div>`).join("");
@@ -316,7 +316,8 @@ function renderStatistics(){
   }
 
   const roleFilter=$("#statsRoleFilter")?.value||"all";
-  if(roleFilter==="pic") data=data.filter(f=>f.role==="P.1"||f.role==="P.1/S");
+  if(roleFilter==="pic") data=data.filter(f=>f.role==="P.1"||f.role==="P.1/S"||f.role==="P.1 (Instructor)");
+  if(roleFilter==="instructor") data=data.filter(f=>f.role==="P.1 (Instructor)");
 
   const dayNightFilter=$("#statsDayNightFilter")?.value||"all";
   if(dayNightFilter==="day") data=data.filter(f=>{
@@ -377,7 +378,8 @@ function renderStatistics(){
         <label>Role
           <select id="statsRoleFilter">
             <option value="all" ${roleFilter==="all"?"selected":""}>All Roles</option>
-            <option value="pic" ${roleFilter==="pic"?"selected":""}>P.1 and P.1/s</option>
+            <option value="pic" ${roleFilter==="pic"?"selected":""}>PIC</option>
+            <option value="instructor" ${roleFilter==="instructor"?"selected":""}>Instructor</option>
           </select>
         </label>
         <label>Time

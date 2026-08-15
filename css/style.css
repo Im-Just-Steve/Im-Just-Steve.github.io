@@ -477,3 +477,11 @@ button.save-action:hover{
 
 /* v0.52: mixed flight rules and instrument-time fields */
 .form-grid .remarks-wide{grid-column:1 / -1;}
+
+/* v0.53: pair take-off/landing fields by day and night */
+#flightDialog .takeoffs-day,
+#flightDialog .landings-day,
+#flightDialog .takeoffs-night,
+#flightDialog .landings-night{
+  min-width:0;
+}

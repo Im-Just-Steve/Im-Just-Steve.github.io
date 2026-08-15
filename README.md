@@ -134,3 +134,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.51: Statistics now uses four polished bubbles only: Total time with VFR/IFR, Instrument time, Take-offs with Day/Night, and Landings with Day/Night. The detailed table was removed and the time filter is labelled All Times.
 
 - v0.52: VFR + IFR minute fields, Actual/Simulated instrument minutes, and full-width Remarks. Built from v0.51 and syntax-checked.
+
+- v0.53: added P.1 (Instructor), updated Pilot Role help, added Statistics PIC/Instructor role filters, and arranged take-off/landing day/night fields in paired rows.
