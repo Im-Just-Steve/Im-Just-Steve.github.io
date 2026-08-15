@@ -298,12 +298,20 @@ function renderStatistics(){
 
   $("#statisticsContent").innerHTML=`
     <div class="panel stats-breakdown">
-      <label>Breakdown
-        <select id="statsBreakdown">
-          <option value="aircraft" ${mode==="aircraft"?"selected":""}>By Aircraft</option>
-          <option value="class" ${mode==="class"?"selected":""}>By Class</option>
-        </select>
-      </label>
+      <div class="stats-breakdown-controls">
+        <label>Breakdown
+          <select id="statsBreakdown">
+            <option value="aircraft" ${mode==="aircraft"?"selected":""}>By Aircraft</option>
+            <option value="class" ${mode==="class"?"selected":""}>By Class</option>
+          </select>
+        </label>
+        <label>Role
+          <select id="statsRoleFilter">
+            <option value="all" ${roleFilter==="all"?"selected":""}>All Roles</option>
+            <option value="pic" ${roleFilter==="pic"?"selected":""}>P.1 and P.1/s</option>
+          </select>
+        </label>
+      </div>
     </div>
     <div class="panel stats-item-panel">
       <div class="stats-item-buttons" role="group" aria-label="${title}">

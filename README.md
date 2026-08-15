@@ -119,4 +119,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 
 - v45 made the Pilot Role help and aircraft-type remove controls smaller and circular, added spacing beside the Pilot Role label, and explicitly applied Add/Save semantic colours to Add Class and Save Flight.
 
-- v46 adds a visible Role dropdown beside Breakdown with All Roles and P.1 and P.1/s filtering.
+- Current app version: v0.46 (Alpha).
+- Statistics Breakdown includes a Role filter for All Roles or P.1 and P.1/s.

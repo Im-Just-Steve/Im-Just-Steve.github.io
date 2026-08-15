@@ -411,7 +411,11 @@ button.save-action:hover{
   color:#194927 !important;
 }
 
-/* v46 fixed: ensure both Breakdown controls are visible side-by-side */
+.app-version{
+  margin:10px 0 14px;
+  font-size:12px;
+  opacity:.78;
+}
 #statistics .stats-breakdown-controls{
   display:flex;
   align-items:center;
@@ -424,8 +428,5 @@ button.save-action:hover{
   gap:10px;
 }
 #statistics .stats-breakdown-controls select{
-  display:block;
-  visibility:visible;
-  opacity:1;
   margin:0;
 }
