@@ -828,3 +828,23 @@ button.save-action:hover{
 .scan-corner{width:32px;height:32px;z-index:40;-webkit-transform:translate(-50%,-50%);transform:translate(-50%,-50%)}
 .scan-magnifier{z-index:60;-webkit-transform:translateZ(0);transform:translateZ(0);will-change:left,top;-webkit-backface-visibility:hidden;backface-visibility:hidden}
 .scan-magnifier canvas{-webkit-transform:translateZ(0);transform:translateZ(0)}
+
+/* v0.76: iOS-safe precision magnifier */
+.scan-magnifier{
+  position:fixed !important;
+  z-index:9999 !important;
+  width:160px !important;
+  height:160px !important;
+  border-radius:50%;
+  overflow:hidden;
+  pointer-events:none !important;
+  -webkit-transform:translateZ(0);
+  transform:translateZ(0);
+  -webkit-backface-visibility:hidden;
+  backface-visibility:hidden;
+}
+.scan-magnifier canvas{
+  display:block;
+  width:160px !important;
+  height:160px !important;
+}

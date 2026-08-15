@@ -287,7 +287,7 @@ function scanRotateSource(){
   ctx.translate(c.width/2,c.height/2);ctx.rotate(Math.PI/2);
   ctx.drawImage(scanImage,-scanImage.naturalWidth/2,-scanImage.naturalHeight/2);
   const rotated=new Image();
-  rotated.onload=()=>{scanImage=rotated;scanResetCorners();scanDraw();};
+  rotated.onload=()=>{scanImage=rotated;scanMagnifierSourceCanvas=null;scanResetCorners();scanDraw();};
   rotated.src=c.toDataURL("image/jpeg",0.96);
 }
 function scanCanvasPoint(e){
@@ -448,6 +448,7 @@ async function scanAddToPhysical(){
   // The captured source image is temporary. Release it and return the
   // importer to its first page so the next scan starts completely fresh.
   if(scanImage)scanImage=null;
+  scanMagnifierSourceCanvas=null;
   scanSourceFile=null;
   scanCorners=[];
   scanRotation=0;
@@ -556,31 +557,64 @@ function scanAnalysePage(){
 }
 
 
+let scanMagnifierSourceCanvas=null;
+
+function scanEnsureMagnifierSource(){
+  if(!scanImage)return null;
+  const w=scanImage.naturalWidth,h=scanImage.naturalHeight;
+  if(!scanMagnifierSourceCanvas ||
+     scanMagnifierSourceCanvas.width!==w ||
+     scanMagnifierSourceCanvas.height!==h){
+    scanMagnifierSourceCanvas=document.createElement("canvas");
+    scanMagnifierSourceCanvas.width=w;
+    scanMagnifierSourceCanvas.height=h;
+    const ctx=scanMagnifierSourceCanvas.getContext("2d");
+    ctx.drawImage(scanImage,0,0);
+  }
+  return scanMagnifierSourceCanvas;
+}
+
 function scanUpdateMagnifier(point){
   const mag=$("#scanMagnifier"),canvas=$("#scanMagnifierCanvas");
   if(!mag||!canvas||!scanImage||scanDragIndex<0)return;
-  const c=$("#scanCanvas"),r=c.getBoundingClientRect();
-  const displayX=point.x-r.left,displayY=point.y-r.top;
-  // Keep the magnifier near the finger, but move it to the opposite side
-  // when necessary so it does not obscure the corner being adjusted.
-  const side=displayX<r.width/2?1:-1;
-  mag.style.left=`${scanClamp(displayX+(side*92)-75,5,r.width-155)}px`;
-  mag.style.top=`${scanClamp(displayY-95,5,r.height-155)}px`;
+
+  const rect=$("#scanCanvas").getBoundingClientRect();
+  const clientX=point.clientX,clientY=point.clientY;
+  const x=clientX-rect.left,y=clientY-rect.top;
+  if(x<0||x>rect.width||y<0||y>rect.height)return;
+
+  const source=scanEnsureMagnifierSourceCanvas();
+  if(!source)return;
+
+  // Keep the magnifier above the finger whenever possible. Fixed positioning
+  // avoids iOS Safari clipping/transform quirks inside the viewer.
+  const size=160;
+  const gap=22;
+  let left=clientX-size/2;
+  let top=clientY-size-gap;
+  if(top<8)top=clientY+gap;
+  left=scanClamp(left,8,window.innerWidth-size-8);
+  top=scanClamp(top,8,window.innerHeight-size-8);
+
+  mag.style.position="fixed";
+  mag.style.left=`${left}px`;
+  mag.style.top=`${top}px`;
+  mag.style.width=`${size}px`;
+  mag.style.height=`${size}px`;
   mag.classList.remove("hidden");
 
   const ctx=canvas.getContext("2d");
-  const naturalW=scanImage.naturalWidth,naturalH=scanImage.naturalHeight;
-  const sx=point.x-r.left;
-  const sy=point.y-r.top;
-  const ix=sx*(naturalW/r.width);
-  const iy=sy*(naturalH/r.height);
-  const sourceSize=Math.min(naturalW,naturalH)/7;
-  ctx.clearRect(0,0,150,150);
-  ctx.fillStyle="#111";ctx.fillRect(0,0,150,150);
+  const sx=x*(source.width/rect.width);
+  const sy=y*(source.height/rect.height);
+  const sourceSize=Math.max(60,Math.min(source.width,source.height)/9);
+
+  ctx.clearRect(0,0,size,size);
+  ctx.fillStyle="#111";
+  ctx.fillRect(0,0,size,size);
   ctx.drawImage(
-    scanImage,
-    ix-sourceSize/2,iy-sourceSize/2,sourceSize,sourceSize,
-    0,0,150,150
+    source,
+    sx-sourceSize/2,sy-sourceSize/2,sourceSize,sourceSize,
+    0,0,size,size
   );
 }
 function scanHideMagnifier(){
@@ -592,7 +626,7 @@ function bindScanLogbook(){
   $("#scanLogbookInput").addEventListener("change",e=>{
     const file=e.target.files?.[0];e.target.value="";if(!file)return;
     const url=URL.createObjectURL(file),img=new Image();
-    img.onload=()=>{URL.revokeObjectURL(url);scanImage=img;scanSourceFile=file;scanRotation=0;scanResetCorners();
+    img.onload=()=>{URL.revokeObjectURL(url);scanImage=img;scanSourceFile=file;scanRotation=0;scanMagnifierSourceCanvas=null;scanResetCorners();
       $("#scanSourcePanel").classList.add("hidden");$("#scanEditorPanel").classList.remove("hidden");scanDraw();};
     img.src=url;
   });
