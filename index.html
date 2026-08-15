@@ -37,13 +37,56 @@
       </div>
     </section>
 
+    <section id="physicalLogbook" class="view">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">PHYSICAL LOG BOOK</p>
+          <h2>Physical Log Book</h2>
+        </div>
+        <div class="section-actions">
+          <label class="primary add-action physical-add-btn">+ Add
+            <input id="physicalLogbookInput" type="file" accept="image/*" multiple hidden>
+          </label>
+          <button class="text-btn" type="button" onclick="showView('logbook')">← Logbook</button>
+        </div>
+      </div>
+      <div class="physical-viewer panel">
+        <div id="physicalPageEmpty" class="physical-empty">
+          <p>No physical log book pages yet.</p>
+          <p class="muted">Add photos or scanned pages to create your physical log book.</p>
+        </div>
+        <div id="physicalPageImageWrap" class="physical-page-wrap hidden">
+          <img id="physicalPageImage" alt="Physical log book page">
+          <div id="physicalPageLoading" class="physical-page-loading hidden">Loading page…</div>
+        </div>
+      </div>
+      <div class="physical-editbar hidden" id="physicalEditbar">
+        <button class="secondary" type="button" id="physicalMoveLeft">Move left</button>
+        <button class="secondary" type="button" id="physicalMoveRight">Move right</button>
+        <button class="danger delete-action" type="button" id="physicalRemove">Delete page</button>
+      </div>
+      <div class="physical-bottom-bar">
+        <button class="secondary icon-nav-btn" type="button" id="physicalPrev" aria-label="Previous page">‹</button>
+        <span id="physicalPageIndicator">No pages</span>
+        <button class="secondary icon-nav-btn" type="button" id="physicalNext" aria-label="Next page">›</button>
+      </div>
+      <div class="physical-actions">
+        <button class="secondary" type="button" id="physicalEditBtn">Edit</button>
+        <button class="secondary" type="button" id="physicalExportBtn">Export ZIP</button>
+        <label class="secondary file-btn">Import ZIP<input id="physicalImportInput" type="file" accept=".zip,application/zip" hidden></label>
+      </div>
+    </section>
+
     <section id="logbook" class="view">
       <div class="section-head">
         <div>
           <p class="eyebrow">LOGBOOK</p>
           <h2>Flights</h2>
         </div>
-        <button class="primary add-action" data-action="new-flight">+ Add</button>
+        <div class="section-actions">
+          <button class="secondary" type="button" onclick="showView('physicalLogbook')">Physical Log Book</button>
+          <button class="primary add-action" data-action="new-flight">+ Add</button>
+        </div>
       </div>
       <div class="toolbar">
         <input id="search" type="search" placeholder="Search registration, airport, route…">

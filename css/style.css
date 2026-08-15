@@ -517,3 +517,22 @@ button.save-action:hover{
 @media (max-width:760px){
   #dashboard #stats{grid-template-columns:repeat(2,minmax(0,1fr));}
 }
+
+/* v0.58: Physical Log Book viewer */
+.section-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.physical-add-btn{display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.physical-viewer{min-height:58vh;padding:12px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.physical-page-wrap{width:100%;height:58vh;display:flex;align-items:center;justify-content:center;position:relative}
+.physical-page-wrap img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.25)}
+.physical-empty{text-align:center;padding:48px 20px}
+.physical-bottom-bar{display:flex;align-items:center;justify-content:center;gap:22px;padding:12px 0}
+.physical-bottom-bar button{min-width:48px}
+.physical-page-indicator{font-weight:700;min-width:120px;text-align:center}
+.physical-editbar,.physical-actions{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.physical-actions{margin-top:4px}
+.physical-page-loading{position:absolute;inset:auto 0 12px;text-align:center}
+@media(max-width:600px){
+  .physical-viewer{min-height:55vh}
+  .physical-page-wrap{height:55vh}
+  .physical-bottom-bar{gap:14px}
+}

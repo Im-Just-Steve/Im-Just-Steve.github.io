@@ -144,3 +144,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.56: simplified Statistics bubbles to Hours, Instrument Hours, Take-offs, and Landings, with the requested breakdowns.
 
 - v0.57: expanded Home overview to Total Hours, PIC Hours, Dual Hours, Night Hours, Instrument Hours, Instructor Hours, Take-offs, and Landings; fixed take-off/landing overview totals to use day/night fields.
+
+- v0.58: added Physical Log Book page with image import, page navigation, edit/reorder/delete controls, IndexedDB storage, and ZIP backup/restore.
