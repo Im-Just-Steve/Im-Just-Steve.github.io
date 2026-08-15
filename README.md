@@ -140,3 +140,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.54: added Dual role filtering for P.U/T and Route filtering for All Routes, Local, and Cross Country.
 
 - v0.55: Statistics bubbles reorganized into Total Time, PIC, Dual, Night, Instrument, Instructor, and combined Take-offs/Landings.
+
+- v0.56: simplified Statistics bubbles to Hours, Instrument Hours, Take-offs, and Landings, with the requested breakdowns.

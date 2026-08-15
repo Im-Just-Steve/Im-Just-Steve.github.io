@@ -435,38 +435,23 @@ function renderStatistics(){
     <div class="stats-grid stats-grid-expanded">
       <div class="stat">
         <strong>${displayHours(stats.hours)} h</strong>
-        <span>Total Time</span>
+        <span>Hours</span>
         <small>VFR ${displayHours(stats.vfrHours)} h · IFR ${displayHours(stats.ifrHours)} h</small>
       </div>
       <div class="stat">
-        <strong>${displayHours(pic.hours)} h</strong>
-        <span>PIC</span>
-        <small>VFR ${displayHours(pic.vfrHours)} h · IFR ${displayHours(pic.ifrHours)} h</small>
-      </div>
-      <div class="stat">
-        <strong>${displayHours(dual.hours)} h</strong>
-        <span>Dual</span>
-        <small>VFR ${displayHours(dual.vfrHours)} h · IFR ${displayHours(dual.ifrHours)} h</small>
-      </div>
-      <div class="stat">
-        <strong>${displayHours(night.hours)} h</strong>
-        <span>Night</span>
-        <small>VFR ${displayHours(night.nightVfr)} h · IFR ${displayHours(night.nightIfr)} h</small>
-      </div>
-      <div class="stat">
         <strong>${displayHours(stats.actualInstrument+stats.simulatedInstrument)} h</strong>
-        <span>Instrument</span>
+        <span>Instrument Hours</span>
         <small>Actual ${displayHours(stats.actualInstrument)} h · Simulated ${displayHours(stats.simulatedInstrument)} h</small>
       </div>
       <div class="stat">
-        <strong>${displayHours(instructor.hours)} h</strong>
-        <span>Instructor</span>
-        <small>VFR ${displayHours(instructor.vfrHours)} h · IFR ${displayHours(instructor.ifrHours)} h</small>
+        <strong>${stats.takeoffsDay+stats.takeoffsNight}</strong>
+        <span>Take-offs</span>
+        <small>Day ${stats.takeoffsDay} · Night ${stats.takeoffsNight}</small>
       </div>
-      <div class="stat stats-take-land">
-        <strong>${stats.takeoffsDay+stats.takeoffsNight+stats.landingsDay+stats.landingsNight}</strong>
-        <span>Take-offs / Landings</span>
-        <small>Take-offs: Day ${stats.takeoffsDay} · Night ${stats.takeoffsNight}<br>Landings: Day ${stats.landingsDay} · Night ${stats.landingsNight}</small>
+      <div class="stat">
+        <strong>${stats.landingsDay+stats.landingsNight}</strong>
+        <span>Landings</span>
+        <small>Day ${stats.landingsDay} · Night ${stats.landingsNight}</small>
       </div>
     </div>`;
 }
