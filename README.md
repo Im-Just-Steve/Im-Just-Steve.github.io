@@ -128,3 +128,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Version source of truth: `version.json` in the project root. Update this file for future releases; the in-app version display reads it at runtime.
 
 - Statistics Breakdown now includes an All/Day/Night filter.
+
+- v0.50: added All Flights to the Statistics Breakdown without nested template-literal HTML; JavaScript syntax validated before packaging.
