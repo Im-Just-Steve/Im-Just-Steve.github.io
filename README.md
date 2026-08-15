@@ -132,3 +132,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.50: added All Flights to the Statistics Breakdown without nested template-literal HTML; JavaScript syntax validated before packaging.
 
 - v0.51: Statistics now uses four polished bubbles only: Total time with VFR/IFR, Instrument time, Take-offs with Day/Night, and Landings with Day/Night. The detailed table was removed and the time filter is labelled All Times.
+
+- v0.52: added VFR + IFR flight rules with conditional VFR/IFR minute fields, split actual/simulated instrument time, and a full-width Remarks row.

@@ -474,3 +474,8 @@ button.save-action:hover{
   #statistics .stat{min-height:116px;padding:16px}
   #statistics .stat strong{font-size:25px}
 }
+
+/* v0.52: Log Flight mixed flight-rule fields and wide remarks row */
+.form-grid .remarks-wide{
+  grid-column:1 / -1;
+}

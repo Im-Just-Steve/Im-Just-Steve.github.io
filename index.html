@@ -181,15 +181,18 @@
           <select id="role"><option>P.1</option><option>P.1/S</option><option>P.2</option><option>P.U/T</option></select>
         </label>
         <label>Flight rules
-          <select id="flightType"><option>VFR</option><option>IFR</option></select>
+          <select id="flightType"><option>VFR</option><option>IFR</option><option>VFR + IFR</option></select>
         </label>
         <label>Night minutes<input id="nightMinutes" type="number" min="0" value="0"></label>
-        <label>Instrument minutes<input id="instrumentMinutes" type="number" min="0" value="0"></label>
+        <label id="vfrMinutesField" class="conditional-field hidden">VFR minutes<input id="vfrMinutes" type="number" min="0" value="0"></label>
+        <label id="ifrMinutesField" class="conditional-field hidden">IFR minutes<input id="ifrMinutes" type="number" min="0" value="0"></label>
+        <label>Instrument minutes (Actual)<input id="instrumentMinutesActual" type="number" min="0" value="0"></label>
+        <label>Instrument minutes (Simulated)<input id="instrumentMinutesSimulated" type="number" min="0" value="0"></label>
         <label>Take-offs — Day<input id="takeoffsDay" type="number" min="0" value="1"></label>
         <label>Take-offs — Night<input id="takeoffsNight" type="number" min="0" value="0"></label>
         <label>Landings — Day<input id="landingsDay" type="number" min="0" value="1"></label>
         <label>Landings — Night<input id="landingsNight" type="number" min="0" value="0"></label>
-        <label>Remarks<input id="remarks" placeholder="Local, circuits, XC…"></label>
+        <label class="remarks-wide">Remarks<input id="remarks" placeholder="Local, circuits, XC…"></label>
       </div>
       <div class="dialog-actions">
         <button type="button" class="danger hidden" id="deleteFlight">Delete</button>
