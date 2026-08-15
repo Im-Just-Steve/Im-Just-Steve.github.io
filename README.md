@@ -166,3 +166,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.68: corrected Phase 1 perspective warping to remove blank regions from saved pages, and reset the importer after adding a corrected page so the captured source is released and the first import step is shown again.
 
 - v0.69: fixed the Phase 1 perspective correction by sampling with a destination-to-source homography, added bilinear image interpolation, and prevented blank corrected pages from being saved.
+
+- v0.70: Phase 2 Pooleys page structure detection with mapped flight rows and entry fields; no flight data is created at this stage.

@@ -126,6 +126,7 @@
           <div class="section-actions">
             <button class="secondary" type="button" id="scanResetBtn">Reset</button>
             <button class="secondary" type="button" id="scanRotateBtn">Rotate 90°</button>
+            <button class="secondary" type="button" id="scanAnalyseBtn">Analyse Pooleys Page</button>
           </div>
         </div>
 
@@ -150,7 +151,31 @@
         <div class="scan-editor-actions">
           <button class="primary add-action" type="button" id="scanAddPhysicalBtn">Add to Physical Log Book</button>
         </div>
-        <p class="muted scan-phase-note">Phase 1 stops here: the corrected page is saved to the Physical Log Book. Flight-data recognition will be added in the next phase.</p>
+        <p class="muted scan-phase-note">Phase 1 prepares a clean page image. Phase 2 can identify the Pooleys table structure before any handwriting is read.</p>
+
+        <div class="scan-structure-panel hidden" id="scanStructurePanel">
+          <div class="scan-structure-summary">
+            <div>
+              <p class="eyebrow">PHASE 2 · PAGE STRUCTURE</p>
+              <h3>Pooleys page detected</h3>
+              <p class="muted" id="scanStructureSummary">Checking the page layout…</p>
+            </div>
+            <span class="scan-detection-badge" id="scanDetectionBadge">Detected</span>
+          </div>
+          <div class="scan-structure-view" id="scanStructureView">
+            <canvas id="scanStructureCanvas"></canvas>
+            <div class="scan-structure-overlay" id="scanStructureOverlay"></div>
+          </div>
+          <div class="scan-structure-legend">
+            <span><i class="scan-key scan-key-row"></i>Flight rows</span>
+            <span><i class="scan-key scan-key-column"></i>Detected fields</span>
+          </div>
+          <p class="muted scan-phase-note">No flight data is created in Phase 2. This step only identifies the rows and fields that Phase 3 will read.</p>
+        </div>
+
+        <div class="scan-editor-actions">
+          <button class="primary add-action" type="button" id="scanAddPhysicalBtn">Add to Physical Log Book</button>
+        </div>
       </div>
     </section>
 

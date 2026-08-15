@@ -681,3 +681,96 @@ button.save-action:hover{
     padding:0 16px 14px;
   }
 }
+
+/* v0.70: Phase 2 Pooleys page structure detection */
+.scan-structure-panel{
+  margin:0 20px 20px;
+  padding:18px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--surface-2);
+}
+.scan-structure-summary{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:16px;
+  margin-bottom:14px;
+}
+.scan-detection-badge{
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(93,170,115,.16);
+  color:var(--success);
+  font-size:.82rem;
+  font-weight:700;
+}
+.scan-structure-view{
+  position:relative;
+  width:100%;
+  overflow:hidden;
+  border-radius:10px;
+  background:#05080d;
+}
+#scanStructureCanvas{
+  display:block;
+  width:100%;
+  height:auto;
+}
+.scan-structure-overlay{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+.scan-detect-box{
+  position:absolute;
+  box-sizing:border-box;
+  overflow:visible;
+}
+.scan-detect-box.row{
+  border:2px solid rgba(91,160,255,.55);
+}
+.scan-detect-box.field{
+  border:1px dashed rgba(91,210,220,.75);
+}
+.scan-detect-box span{
+  position:absolute;
+  top:2px;
+  left:2px;
+  max-width:calc(100% - 4px);
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  padding:2px 4px;
+  border-radius:3px;
+  font-size:9px;
+  line-height:1.1;
+  background:rgba(5,8,13,.82);
+  color:#fff;
+  opacity:.9;
+}
+.scan-structure-legend{
+  display:flex;
+  gap:18px;
+  flex-wrap:wrap;
+  margin-top:12px;
+  font-size:.82rem;
+}
+.scan-structure-legend span{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+}
+.scan-key{
+  display:inline-block;
+  width:22px;
+  height:12px;
+  border-radius:2px;
+}
+.scan-key-row{border:2px solid rgba(91,160,255,.7)}
+.scan-key-column{border:1px dashed rgba(91,210,220,.85)}
+@media(max-width:650px){
+  .scan-structure-panel{margin:0 16px 16px;padding:14px}
+  .scan-structure-summary{display:block}
+  .scan-detect-box span{font-size:7px}
+}

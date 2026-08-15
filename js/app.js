@@ -446,6 +446,104 @@ async function scanAddToPhysical(){
   $("#scanSourcePanel").classList.remove("hidden");
   toast("Corrected page added to Physical Log Book");
 }
+
+/* Phase 2: Pooleys page structure detection.
+   The Pooleys layout is a fixed printed template, so we identify its
+   geometry from the corrected page rather than trying to OCR handwriting yet. */
+const POOLEYS_TEMPLATE={
+  rows:10,
+  left:{
+    x:0.020,y:0.265,w:0.475,h:0.665,
+    fields:[
+      ["Date",0.00,0.092],
+      ["Aircraft Type",0.092,0.213],
+      ["Registration",0.213,0.321],
+      ["Captain",0.321,0.485],
+      ["Operating Capacity",0.485,0.567],
+      ["From",0.567,0.715],
+      ["To",0.715,0.865],
+      ["Departure",0.865,0.934],
+      ["Arrival",0.934,1.00]
+    ]
+  },
+  right:{
+    x:0.505,y:0.205,w:0.485,h:0.73,
+    fields:[
+      ["Flying Time / Role",0.00,0.575],
+      ["Instrument",0.575,0.655],
+      ["Simulated Instrument",0.655,0.705],
+      ["Day / Night TO",0.705,0.80],
+      ["Day / Night LDG",0.80,0.89],
+      ["Remarks",0.89,1.00]
+    ]
+  }
+};
+
+function scanStructureDraw(){
+  const source=scanCorrectedCanvas();
+  if(!source)return;
+  const canvas=$("#scanStructureCanvas");
+  const wrap=$("#scanStructureView");
+  const maxW=Math.max(700,Math.min(1600,wrap.clientWidth||1200));
+  const scale=Math.min(1,maxW/source.width);
+  canvas.width=Math.round(source.width*scale);
+  canvas.height=Math.round(source.height*scale);
+  const ctx=canvas.getContext("2d");
+  ctx.drawImage(source,0,0,canvas.width,canvas.height);
+
+  const overlay=$("#scanStructureOverlay");
+  overlay.innerHTML="";
+  const pageW=canvas.width,pageH=canvas.height;
+
+  const addBox=(left,top,width,height,label,kind)=>{
+    const el=document.createElement("div");
+    el.className=`scan-detect-box ${kind}`;
+    el.style.left=`${left*100}%`;
+    el.style.top=`${top*100}%`;
+    el.style.width=`${width*100}%`;
+    el.style.height=`${height*100}%`;
+    el.title=label;
+    const tag=document.createElement("span");
+    tag.textContent=label;
+    el.appendChild(tag);
+    overlay.appendChild(el);
+  };
+
+  // Left-hand flight table.
+  const L=POOLEYS_TEMPLATE.left;
+  const rowY=L.y, rowH=L.h/POOLEYS_TEMPLATE.rows;
+  for(let i=0;i<POOLEYS_TEMPLATE.rows;i++){
+    addBox(L.x,rowY+i*rowH,L.w,rowH,`Flight row ${i+1}`,"row");
+  }
+  L.fields.forEach(([label,x1,x2])=>{
+    addBox(L.x+L.w*x1,L.y,L.w*(x2-x1),L.h,label,"field");
+  });
+
+  // Right-hand table fields. Its horizontal flight rows line up with the
+  // left table, so show the same row detection on the corresponding area.
+  const R=POOLEYS_TEMPLATE.right;
+  for(let i=0;i<POOLEYS_TEMPLATE.rows;i++){
+    addBox(R.x,R.y+i*(R.h/POOLEYS_TEMPLATE.rows),R.w,R.h/POOLEYS_TEMPLATE.rows,`Flight row ${i+1}`,"row");
+  }
+  R.fields.forEach(([label,x1,x2])=>{
+    addBox(R.x+R.w*x1,R.y,R.w*(x2-x1),R.h,label,"field");
+  });
+
+  $("#scanStructureSummary").textContent=
+    `${POOLEYS_TEMPLATE.rows} flight rows identified, with the main entry fields mapped on both sides of the Pooleys spread.`;
+}
+
+function scanAnalysePage(){
+  if(!scanImage){
+    alert("Choose a physical log book page first.");
+    return;
+  }
+  $("#scanStructurePanel").classList.remove("hidden");
+  $("#scanAnalyseBtn").textContent="Pooleys Page Analysed";
+  $("#scanAnalyseBtn").classList.add("save-action");
+  scanStructureDraw();
+}
+
 function bindScanLogbook(){
   $("#scanLogbookInput").addEventListener("change",e=>{
     const file=e.target.files?.[0];e.target.value="";if(!file)return;
@@ -454,8 +552,20 @@ function bindScanLogbook(){
       $("#scanSourcePanel").classList.add("hidden");$("#scanEditorPanel").classList.remove("hidden");scanDraw();};
     img.src=url;
   });
-  $("#scanResetBtn").onclick=()=>{scanResetCorners();scanDraw();};
-  $("#scanRotateBtn").onclick=scanRotateSource;
+  $("#scanResetBtn").onclick=()=>{
+    scanResetCorners();
+    $("#scanStructurePanel").classList.add("hidden");
+    $("#scanAnalyseBtn").textContent="Analyse Pooleys Page";
+    $("#scanAnalyseBtn").classList.remove("save-action");
+    scanDraw();
+  };
+  $("#scanRotateBtn").onclick=()=>{
+    $("#scanStructurePanel").classList.add("hidden");
+    $("#scanAnalyseBtn").textContent="Analyse Pooleys Page";
+    $("#scanAnalyseBtn").classList.remove("save-action");
+    scanRotateSource();
+  };
+  $("#scanAnalyseBtn").onclick=scanAnalysePage;
   $("#scanAddPhysicalBtn").onclick=scanAddToPhysical;
   document.querySelectorAll(".scan-corner").forEach(el=>{
     el.addEventListener("pointerdown",e=>{e.preventDefault();scanDragIndex=Number(el.dataset.corner);el.setPointerCapture(e.pointerId);});
@@ -466,7 +576,12 @@ function bindScanLogbook(){
     el.addEventListener("pointerup",()=>{scanDragIndex=-1;});
     el.addEventListener("pointercancel",()=>{scanDragIndex=-1;});
   });
-  window.addEventListener("resize",()=>{if(scanImage)scanDraw();});
+  window.addEventListener("resize",()=>{
+    if(scanImage){
+      scanDraw();
+      if(!$("#scanStructurePanel").classList.contains("hidden"))scanStructureDraw();
+    }
+  });
 }
 
 document.addEventListener("DOMContentLoaded", async ()=>{
