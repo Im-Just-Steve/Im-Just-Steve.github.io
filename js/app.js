@@ -319,8 +319,11 @@ function solve8(A,b){
   for(let i=n-1;i>=0;i--){let v=M[i][n];for(let j=i+1;j<n;j++)v-=M[i][j]*x[j];x[i]=v/M[i][i];}
   return x;
 }
-function homography(srcPts,dstW,dstH){
-  const dstPts=[{x:0,y:0},{x:dstW,y:0},{x:dstW,y:dstH},{x:0,y:dstH}],A=[],b=[];
+function homography(srcPts,dstW,dstH,dstPtsOverride=null){
+  const dstPts=dstPtsOverride||[
+    {x:0,y:0},{x:dstW,y:0},{x:dstW,y:dstH},{x:0,y:dstH}
+  ];
+  const A=[],b=[];
   srcPts.forEach((p,i)=>{
     const q=dstPts[i],x=p.x,y=p.y,u=q.x,v=q.y;
     A.push([x,y,1,0,0,0,-u*x,-u*y]);b.push(u);
@@ -328,69 +331,88 @@ function homography(srcPts,dstW,dstH){
   });
   return solve8(A,b);
 }
+
 function scanCorrectedCanvas(){
   if(!scanImage)return null;
+
   const [tl,tr,br,bl]=scanCorners;
-  const top=Math.hypot(tr.x-tl.x,tr.y-tl.y),bottom=Math.hypot(br.x-bl.x,br.y-bl.y);
-  const left=Math.hypot(bl.x-tl.x,bl.y-tl.y),right=Math.hypot(br.x-tr.x,br.y-tr.y);
-  const ratio=Math.max(.35,Math.min(3,(top+bottom)/(left+right)));
-  const maxSide=1800;
+  const top=Math.hypot(tr.x-tl.x,tr.y-tl.y);
+  const bottom=Math.hypot(br.x-bl.x,br.y-bl.y);
+  const left=Math.hypot(bl.x-tl.x,bl.y-tl.y);
+  const right=Math.hypot(br.x-tr.x,br.y-tr.y);
+
+  // Preserve the photographed page's aspect ratio while producing a
+  // sensible, high-resolution image for the Physical Log Book.
+  const pageW=Math.max(1,(top+bottom)/2);
+  const pageH=Math.max(1,(left+right)/2);
+  const ratio=pageW/pageH;
   let outW=1600,outH=Math.round(outW/ratio);
-  if(outH>maxSide){outH=maxSide;outW=Math.round(outH*ratio);}
-  outW=Math.max(800,outW);outH=Math.max(500,outH);
+  if(outH>1800){outH=1800;outW=Math.round(outH*ratio);}
+  outW=Math.max(800,outW);
+  outH=Math.max(500,outH);
 
-  // homography() maps the four source corners to the rectangular destination.
-  // For each destination pixel we need the inverse transform back into the source.
-  const H=homography(scanCorners,outW,outH);
+  // IMPORTANT: solve the homography in the direction we actually sample:
+  // destination rectangle -> the four selected source corners.
+  // This avoids the blank/white output caused by attempting to invert the
+  // source->destination matrix pixel-by-pixel.
+  const dstPts=[
+    {x:0,y:0},
+    {x:outW,y:0},
+    {x:outW,y:outH},
+    {x:0,y:outH}
+  ];
+  const H=homography(dstPts,outW,outH,scanCorners);
   if(!H)return null;
+
   const [a,b,c,d,e,f,g,h]=H;
-  const inv=solve8(
-    [
-      [a,d,g,0,0,0,0,0],
-      [b,e,h,0,0,0,0,0],
-      [c,f,1,0,0,0,0,0],
-      [0,0,0,a,d,g,0,0],
-      [0,0,0,b,e,h,0,0],
-      [0,0,0,c,f,1,0,0],
-      [0,0,0,0,0,0,a,d,g],
-      [0,0,0,0,0,0,b,e,h]
-    ],
-    [1,0,0,0,1,0,0,1]
-  );
-
-  // The compact 3x3 inverse is calculated explicitly for numerical stability.
-  const det=a*(e-f*h)-b*(d-f*g)+c*(d*h-e*g);
-  if(Math.abs(det)<1e-10)return null;
-  const ia=(e-f*h)/det, ib=(c*h-b)/det, ic=(b*f-c*e)/det;
-  const id=(f*g-d*h)/det, ie=(a*h-c*g)/det, iff=(c*d-a*f)/det;
-  const ig=(d*h-e*g)/det, ih=(b*d-a*h)/det, ii=(a*e-b*d)/det;
-
-  const out=document.createElement("canvas");out.width=outW;out.height=outH;
-  const octx=out.getContext("2d");
-  const src=document.createElement("canvas");
-  src.width=scanImage.naturalWidth;src.height=scanImage.naturalHeight;
-  const sctx=src.getContext("2d");
+  const srcCanvas=document.createElement("canvas");
+  srcCanvas.width=scanImage.naturalWidth;
+  srcCanvas.height=scanImage.naturalHeight;
+  const sctx=srcCanvas.getContext("2d",{willReadFrequently:true});
   sctx.drawImage(scanImage,0,0);
-  const sw=src.width,sh=src.height,sd=sctx.getImageData(0,0,sw,sh).data;
-  const data=octx.createImageData(outW,outH),dta=data.data;
+  const sw=srcCanvas.width,sh=srcCanvas.height;
+  const sd=sctx.getImageData(0,0,sw,sh).data;
+
+  const out=document.createElement("canvas");
+  out.width=outW;
+  out.height=outH;
+  const octx=out.getContext("2d");
+  const result=octx.createImageData(outW,outH);
+  const rd=result.data;
 
   for(let y=0;y<outH;y++){
     for(let x=0;x<outW;x++){
-      const den=ig*x+ih*y+ii;
+      const den=g*x+h*y+1;
       if(Math.abs(den)<1e-10)continue;
-      const sx=(ia*x+ib*y+ic)/den;
-      const sy=(id*x+ie*y+iff)/den;
-      const ix=Math.round(sx),iy=Math.round(sy);
-      if(ix>=0&&ix<sw&&iy>=0&&iy<sh){
-        const si=(iy*sw+ix)*4,di=(y*outW+x)*4;
-        dta[di]=sd[si];dta[di+1]=sd[si+1];dta[di+2]=sd[si+2];dta[di+3]=255;
+
+      const sx=(a*x+b*y+c)/den;
+      const sy=(d*x+e*y+f)/den;
+
+      // Bilinear interpolation gives a much cleaner result than nearest
+      // neighbour, especially for photographed handwriting.
+      const x0=Math.floor(sx),y0=Math.floor(sy);
+      const x1=x0+1,y1=y0+1;
+      const wx=sx-x0,wy=sy-y0;
+      if(x0<0||y0<0||x1>=sw||y1>=sh)continue;
+
+      const i00=(y0*sw+x0)*4;
+      const i10=(y0*sw+x1)*4;
+      const i01=(y1*sw+x0)*4;
+      const i11=(y1*sw+x1)*4;
+      const di=(y*outW+x)*4;
+
+      for(let ch=0;ch<3;ch++){
+        const topv=sd[i00+ch]*(1-wx)+sd[i10+ch]*wx;
+        const botv=sd[i01+ch]*(1-wx)+sd[i11+ch]*wx;
+        rd[di+ch]=Math.round(topv*(1-wy)+botv*wy);
       }
+      rd[di+3]=255;
     }
   }
-  octx.putImageData(data,0,0);
+
+  octx.putImageData(result,0,0);
   return out;
 }
-
 function scanUpdatePreview(){
   const out=scanCorrectedCanvas(),p=$("#scanPreviewCanvas");
   if(!out||!p)return;
@@ -401,6 +423,10 @@ function scanUpdatePreview(){
 async function scanAddToPhysical(){
   const out=scanCorrectedCanvas();if(!out)return;
   const blob=await new Promise(r=>out.toBlob(r,"image/jpeg",.94));
+  if(!blob || blob.size<1000){
+    alert("The corrected page could not be created. Please adjust the four corners and try again.");
+    return;
+  }
   const page=physicalFileToPage(
     new File([blob],"physical-logbook-page.jpg",{type:"image/jpeg"}),
     physicalPages.length
