@@ -136,3 +136,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.52: VFR + IFR minute fields, Actual/Simulated instrument minutes, and full-width Remarks. Built from v0.51 and syntax-checked.
 
 - v0.53: added P.1 (Instructor), updated Pilot Role help, added Statistics PIC/Instructor role filters, and arranged take-off/landing day/night fields in paired rows.
+
+- v0.54: added Dual role filtering for P.U/T and Route filtering for All Routes, Local, and Cross Country.

@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     if(item){statsSelectedItem=item.dataset.statsItem;renderStatistics();}
   });
   document.addEventListener("change",e=>{
-    if(e.target.id==="statsBreakdown"||e.target.id==="statsRoleFilter"||e.target.id==="statsDayNightFilter"){
+    if(e.target.id==="statsBreakdown"||e.target.id==="statsRoleFilter"||e.target.id==="statsRouteFilter"||e.target.id==="statsDayNightFilter"){
       statsSelectedItem=null;
       renderStatistics();
     }
@@ -318,6 +318,11 @@ function renderStatistics(){
   const roleFilter=$("#statsRoleFilter")?.value||"all";
   if(roleFilter==="pic") data=data.filter(f=>f.role==="P.1"||f.role==="P.1/S"||f.role==="P.1 (Instructor)");
   if(roleFilter==="instructor") data=data.filter(f=>f.role==="P.1 (Instructor)");
+  if(roleFilter==="dual") data=data.filter(f=>f.role==="P.U/T");
+
+  const routeFilter=$("#statsRouteFilter")?.value||"all";
+  if(routeFilter==="local") data=data.filter(f=>String(f.departure||"").trim().toUpperCase()===String(f.arrival||"").trim().toUpperCase());
+  if(routeFilter==="crossCountry") data=data.filter(f=>String(f.departure||"").trim().toUpperCase()!==String(f.arrival||"").trim().toUpperCase());
 
   const dayNightFilter=$("#statsDayNightFilter")?.value||"all";
   if(dayNightFilter==="day") data=data.filter(f=>{
@@ -380,6 +385,14 @@ function renderStatistics(){
             <option value="all" ${roleFilter==="all"?"selected":""}>All Roles</option>
             <option value="pic" ${roleFilter==="pic"?"selected":""}>PIC</option>
             <option value="instructor" ${roleFilter==="instructor"?"selected":""}>Instructor</option>
+            <option value="dual" ${roleFilter==="dual"?"selected":""}>Dual</option>
+          </select>
+        </label>
+        <label>Route
+          <select id="statsRouteFilter">
+            <option value="all" ${routeFilter==="all"?"selected":""}>All Routes</option>
+            <option value="local" ${routeFilter==="local"?"selected":""}>Local</option>
+            <option value="crossCountry" ${routeFilter==="crossCountry"?"selected":""}>Cross Country</option>
           </select>
         </label>
         <label>Time
