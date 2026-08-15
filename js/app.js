@@ -104,12 +104,15 @@ async function physicalRender(){
   if(!has){
     indicator.textContent="No pages";
     $("#physicalPrev").disabled=true;$("#physicalNext").disabled=true;
+    $("#physicalSidePrev").disabled=true;$("#physicalSideNext").disabled=true;
     if(physicalObjectUrl){URL.revokeObjectURL(physicalObjectUrl);physicalObjectUrl=null;}
     return;
   }
   indicator.textContent=`Page ${physicalIndex+1} of ${physicalPages.length}`;
   $("#physicalPrev").disabled=physicalIndex===0;
   $("#physicalNext").disabled=physicalIndex===physicalPages.length-1;
+  $("#physicalSidePrev").disabled=physicalIndex===0;
+  $("#physicalSideNext").disabled=physicalIndex===physicalPages.length-1;
   $("#physicalMoveLeft").disabled=physicalIndex===0;
   $("#physicalMoveRight").disabled=physicalIndex===physicalPages.length-1;
   if(physicalObjectUrl)URL.revokeObjectURL(physicalObjectUrl);
@@ -228,8 +231,12 @@ async function physicalImportZip(file){
 
 function bindPhysicalLogbook(){
   $("#physicalLogbookInput").addEventListener("change",e=>{physicalAddFiles(e.target.files);e.target.value="";});
-  $("#physicalPrev").onclick=()=>{if(physicalIndex>0){physicalIndex--;physicalRender();}};
-  $("#physicalNext").onclick=()=>{if(physicalIndex<physicalPages.length-1){physicalIndex++;physicalRender();}};
+  const physicalGoPrev=()=>{if(physicalIndex>0){physicalIndex--;physicalRender();}};
+  const physicalGoNext=()=>{if(physicalIndex<physicalPages.length-1){physicalIndex++;physicalRender();}};
+  $("#physicalPrev").onclick=physicalGoPrev;
+  $("#physicalNext").onclick=physicalGoNext;
+  $("#physicalSidePrev").onclick=physicalGoPrev;
+  $("#physicalSideNext").onclick=physicalGoNext;
   $("#physicalStartEditBtn").onclick=async()=>{
     physicalEditMode=true;
     physicalSelectedIds.clear();
