@@ -313,17 +313,26 @@ function renderStatistics(){
     a.ld+=n.landingsDay;a.ln+=n.landingsNight;a.lt+=n.landingsTotal;return a;
   },{td:0,tn:0,tt:0,ld:0,ln:0,lt:0});
 
-  const mode=$("#statsBreakdown")?.value||"aircraft";
-  const groups=statsGroups(data,mode);
-  if(!statsSelectedItem||!groups.some(g=>g.name===statsSelectedItem)) statsSelectedItem=groups[0]?.name||null;
-  const selected=groups.find(g=>g.name===statsSelectedItem);
-  const title=mode==="class"?"By Class":mode==="registration"?"By Registration":"By Aircraft";
+  const mode=$("#statsBreakdown")?.value||"all";
+  const groups=mode==="all"?[]:statsGroups(data,mode);
+  if(mode!=="all" && (!statsSelectedItem||!groups.some(g=>g.name===statsSelectedItem))) statsSelectedItem=groups[0]?.name||null;
+  const selected=mode==="all"?{
+    name:"All Flights",
+    hours:data.reduce((sum,f)=>sum+entryHours(f.blockMinutes),0),
+    ...data.reduce((a,f)=>{const n=getDayNightCounts(f);
+      a.takeoffsDay+=n.takeoffsDay;a.takeoffsNight+=n.takeoffsNight;a.takeoffsTotal+=n.takeoffsTotal;
+      a.landingsDay+=n.landingsDay;a.landingsNight+=n.landingsNight;a.landingsTotal+=n.landingsTotal;
+      return a;
+    },{takeoffsDay:0,takeoffsNight:0,takeoffsTotal:0,landingsDay:0,landingsNight:0,landingsTotal:0})
+  }:groups.find(g=>g.name===statsSelectedItem);
+  const title=mode==="all"?"All Flights":mode==="class"?"By Class":mode==="registration"?"By Registration":"By Aircraft";
 
   $("#statisticsContent").innerHTML=`
     <div class="panel stats-breakdown">
       <div class="stats-breakdown-controls">
         <label>Breakdown
           <select id="statsBreakdown">
+            <option value="all" ${mode==="all"?"selected":""}>All Flights</option>
             <option value="aircraft" ${mode==="aircraft"?"selected":""}>By Aircraft</option>
             <option value="class" ${mode==="class"?"selected":""}>By Class</option>
             <option value="registration" ${mode==="registration"?"selected":""}>By Registration</option>
@@ -337,7 +346,7 @@ function renderStatistics(){
         </label>
         <label>Time
           <select id="statsDayNightFilter">
-            <option value="all" ${dayNightFilter==="all"?"selected":""}>All</option>
+            <option value="all" ${dayNightFilter==="all"?"selected":""}>All Times</option>
             <option value="day" ${dayNightFilter==="day"?"selected":""}>Day</option>
             <option value="night" ${dayNightFilter==="night"?"selected":""}>Night</option>
           </select>
@@ -346,7 +355,7 @@ function renderStatistics(){
     </div>
     <div class="panel stats-item-panel">
       <div class="stats-item-buttons" role="group" aria-label="${title}">
-        ${groups.length?groups.map(g=>`<button type="button" class="filter-btn stats-item-btn ${g.name===statsSelectedItem?"active":""}" data-stats-item="${escapeHTML(g.name)}">${escapeHTML(g.name)}</button>`).join(""):'<span class="empty">No flights in this period.</span>'}
+        ${mode==="all"?"<button type="button" class="filter-btn stats-item-btn active">All Flights</button>":groups.length?groups.map(g=>`<button type="button" class="filter-btn stats-item-btn ${g.name===statsSelectedItem?"active":""}" data-stats-item="${escapeHTML(g.name)}">${escapeHTML(g.name)}</button>`).join(""):'<span class="empty">No flights in this period.</span>'}
       </div>
     </div>
     <div class="stats-grid">
