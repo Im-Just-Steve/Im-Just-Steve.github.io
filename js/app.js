@@ -277,59 +277,68 @@ function statsGroups(data,mode){
   });
   return Object.entries(groups).map(([name,items])=>items.reduce((a,f)=>{
     const n=getDayNightCounts(f);
-    a.hours+=entryHours(f.blockMinutes);
+    const hours=entryHours(Number(f.blockMinutes)||0);
+    a.hours+=hours;
+    if(String(f.flightType||"").toUpperCase()==="IFR") a.ifrHours+=hours;
+    else a.vfrHours+=hours;
+    a.instrumentHours+=entryHours(Number(f.instrumentMinutes)||0);
     a.takeoffsDay+=n.takeoffsDay;a.takeoffsNight+=n.takeoffsNight;a.takeoffsTotal+=n.takeoffsTotal;
     a.landingsDay+=n.landingsDay;a.landingsNight+=n.landingsNight;a.landingsTotal+=n.landingsTotal;
     return a;
-  },{name,hours:0,takeoffsDay:0,takeoffsNight:0,takeoffsTotal:0,landingsDay:0,landingsNight:0,landingsTotal:0})).sort((a,b)=>b.hours-a.hours);
+  },{name,hours:0,vfrHours:0,ifrHours:0,instrumentHours:0,takeoffsDay:0,takeoffsNight:0,takeoffsTotal:0,landingsDay:0,landingsNight:0,landingsTotal:0})).sort((a,b)=>b.hours-a.hours);
 }
+
 function renderStatistics(){
   const active=$("#statistics .filter-btn.active")?.dataset.statsRange||"all";
-  let data=flights,rangeLabel="All time";
+  let data=flights;
   if(active==="90"){
     const end=new Date();end.setHours(23,59,59,999);
     const start=new Date(end);start.setDate(start.getDate()-89);
     const from=start.toISOString().slice(0,10),to=end.toISOString().slice(0,10);
-    data=flights.filter(f=>f.date>=from&&f.date<=to);rangeLabel=`${formatDate(from)} – ${formatDate(to)}`;
+    data=flights.filter(f=>f.date>=from&&f.date<=to);
   }else if(active==="custom"){
     const from=$("#statsFrom").value,to=$("#statsTo").value;
-    if(from&&to){data=flights.filter(f=>f.date>=from&&f.date<=to);rangeLabel=`${formatDate(from)} – ${formatDate(to)}`;}
-    else {data=[];rangeLabel="Choose a start and end date";}
+    data=from&&to?flights.filter(f=>f.date>=from&&f.date<=to):[];
   }
 
   const roleFilter=$("#statsRoleFilter")?.value||"all";
   if(roleFilter==="pic") data=data.filter(f=>f.role==="P.1"||f.role==="P.1/S");
 
   const dayNightFilter=$("#statsDayNightFilter")?.value||"all";
-  if(dayNightFilter==="day") data=data.filter(f=>getDayNightCounts(f).takeoffsDay>0||getDayNightCounts(f).landingsDay>0);
-  if(dayNightFilter==="night") data=data.filter(f=>getDayNightCounts(f).takeoffsNight>0||getDayNightCounts(f).landingsNight>0);
+  if(dayNightFilter==="day") data=data.filter(f=>{
+    const n=getDayNightCounts(f); return n.takeoffsDay>0||n.landingsDay>0;
+  });
+  if(dayNightFilter==="night") data=data.filter(f=>{
+    const n=getDayNightCounts(f); return n.takeoffsNight>0||n.landingsNight>0;
+  });
 
-  const totalTime=sumRoundedHours(data);
-  const picTime=sumRoundedHours(data.filter(f=>f.role==="P.1"||f.role==="P.1/S"));
-  const nightTime=sumRoundedHours(data,"nightMinutes");
-  const instrumentTime=sumRoundedHours(data,"instrumentMinutes");
-  const counts=data.reduce((a,f)=>{const n=getDayNightCounts(f);
-    a.td+=n.takeoffsDay;a.tn+=n.takeoffsNight;a.tt+=n.takeoffsTotal;
-    a.ld+=n.landingsDay;a.ln+=n.landingsNight;a.lt+=n.landingsTotal;return a;
-  },{td:0,tn:0,tt:0,ld:0,ln:0,lt:0});
-
-  const mode=$("#statsBreakdown")?.value||"aircraft";
+  const mode=$("#statsBreakdown")?.value||"all";
   const groups=mode==="all"?[]:statsGroups(data,mode);
   if(mode!=="all" && (!statsSelectedItem||!groups.some(g=>g.name===statsSelectedItem))) statsSelectedItem=groups[0]?.name||null;
-  const selected=mode==="all" ? {
-    name:"All Flights",
-    hours:data.reduce((sum,f)=>sum+entryHours(f.blockMinutes),0),
-    ...data.reduce((a,f)=>{
-      const n=getDayNightCounts(f);
-      a.takeoffsDay+=n.takeoffsDay;
-      a.takeoffsNight+=n.takeoffsNight;
-      a.takeoffsTotal+=n.takeoffsTotal;
-      a.landingsDay+=n.landingsDay;
-      a.landingsNight+=n.landingsNight;
-      a.landingsTotal+=n.landingsTotal;
-      return a;
-    },{takeoffsDay:0,takeoffsNight:0,takeoffsTotal:0,landingsDay:0,landingsNight:0,landingsTotal:0})
-  } : groups.find(g=>g.name===statsSelectedItem);
+
+  let selectedData=data;
+  if(mode!=="all" && statsSelectedItem){
+    if(mode==="aircraft") selectedData=data.filter(f=>String(f.aircraft||"").trim().toUpperCase()===String(statsSelectedItem).toUpperCase());
+    else if(mode==="registration") selectedData=data.filter(f=>String(f.registration||"").trim().toUpperCase()===String(statsSelectedItem).toUpperCase());
+    else if(mode==="class"){
+      const cls=aircraftClasses.find(c=>c.name===statsSelectedItem);
+      const types=new Set((cls?.types||[]).map(t=>String(t).trim().toUpperCase()));
+      selectedData=data.filter(f=>types.has(String(f.aircraft||"").trim().toUpperCase()));
+    }
+  }
+
+  const aggregate=list=>list.reduce((a,f)=>{
+    const n=getDayNightCounts(f),hours=entryHours(Number(f.blockMinutes)||0);
+    a.hours+=hours;
+    if(String(f.flightType||"").toUpperCase()==="IFR") a.ifrHours+=hours;
+    else a.vfrHours+=hours;
+    a.instrumentHours+=entryHours(Number(f.instrumentMinutes)||0);
+    a.takeoffsDay+=n.takeoffsDay;a.takeoffsNight+=n.takeoffsNight;a.takeoffsTotal+=n.takeoffsTotal;
+    a.landingsDay+=n.landingsDay;a.landingsNight+=n.landingsNight;a.landingsTotal+=n.landingsTotal;
+    return a;
+  },{hours:0,vfrHours:0,ifrHours:0,instrumentHours:0,takeoffsDay:0,takeoffsNight:0,takeoffsTotal:0,landingsDay:0,landingsNight:0,landingsTotal:0});
+
+  const stats=aggregate(selectedData);
   const title=mode==="all"?"All Flights":mode==="class"?"By Class":mode==="registration"?"By Registration":"By Aircraft";
 
   $("#statisticsContent").innerHTML=`
@@ -351,7 +360,7 @@ function renderStatistics(){
         </label>
         <label>Time
           <select id="statsDayNightFilter">
-            <option value="all" ${dayNightFilter==="all"?"selected":""}>All</option>
+            <option value="all" ${dayNightFilter==="all"?"selected":""}>All Times</option>
             <option value="day" ${dayNightFilter==="day"?"selected":""}>Day</option>
             <option value="night" ${dayNightFilter==="night"?"selected":""}>Night</option>
           </select>
@@ -368,24 +377,26 @@ function renderStatistics(){
       </div>
     </div>
     <div class="stats-grid">
-      <div class="stat"><strong>${selected?displayHours(selected.hours):"0.0"} h</strong><span>Total time</span></div>
-      <div class="stat"><strong>${selected?selected.takeoffsTotal:0}</strong><span>Take-offs</span><small>Day ${selected?selected.takeoffsDay:0} · Night ${selected?selected.takeoffsNight:0}</small></div>
-      <div class="stat"><strong>${selected?selected.landingsTotal:0}</strong><span>Landings</span><small>Day ${selected?selected.landingsDay:0} · Night ${selected?selected.landingsNight:0}</small></div>
-      <div class="stat"><strong>${selected?displayHours(selected.hours):"0.0"} h</strong><span>Hours</span></div>
-    </div>
-    <div class="panel"><table class="stat-table">
-      <tr><td>Flights</td><td>${data.length}</td></tr>
-      <tr><td>Total time</td><td>${displayHours(totalTime)} h</td></tr>
-      <tr><td>P.1 / P.1/S time</td><td>${displayHours(picTime)} h</td></tr>
-      <tr><td>Night time</td><td>${displayHours(nightTime)} h</td></tr>
-      <tr><td>Instrument time</td><td>${displayHours(instrumentTime)} h</td></tr>
-      <tr><td>Take-offs — Day</td><td>${counts.td}</td></tr>
-      <tr><td>Take-offs — Night</td><td>${counts.tn}</td></tr>
-      <tr><td>Take-offs — Total</td><td>${counts.tt}</td></tr>
-      <tr><td>Landings — Day</td><td>${counts.ld}</td></tr>
-      <tr><td>Landings — Night</td><td>${counts.ln}</td></tr>
-      <tr><td>Landings — Total</td><td>${counts.lt}</td></tr>
-    </table></div>`;
+      <div class="stat">
+        <strong>${displayHours(stats.hours)} h</strong>
+        <span>Total time</span>
+        <small>VFR ${displayHours(stats.vfrHours)} h · IFR ${displayHours(stats.ifrHours)} h</small>
+      </div>
+      <div class="stat">
+        <strong>${displayHours(stats.instrumentHours)} h</strong>
+        <span>Instrument time</span>
+      </div>
+      <div class="stat">
+        <strong>${stats.takeoffsTotal}</strong>
+        <span>Take-offs</span>
+        <small>Day ${stats.takeoffsDay} · Night ${stats.takeoffsNight}</small>
+      </div>
+      <div class="stat">
+        <strong>${stats.landingsTotal}</strong>
+        <span>Landings</span>
+        <small>Day ${stats.landingsDay} · Night ${stats.landingsNight}</small>
+      </div>
+    </div>`;
 }
 
 function formatDate(s){return new Date(s+"T12:00:00").toLocaleDateString(undefined,{day:"2-digit",month:"short",year:"numeric"})}

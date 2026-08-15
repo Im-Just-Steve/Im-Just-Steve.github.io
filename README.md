@@ -130,3 +130,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - Statistics Breakdown now includes an All/Day/Night filter.
 
 - v0.50: added All Flights to the Statistics Breakdown without nested template-literal HTML; JavaScript syntax validated before packaging.
+
+- v0.51: Statistics now uses four polished bubbles only: Total time with VFR/IFR, Instrument time, Take-offs with Day/Night, and Landings with Day/Night. The detailed table was removed and the time filter is labelled All Times.
