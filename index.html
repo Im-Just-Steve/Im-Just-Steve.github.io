@@ -72,8 +72,6 @@
       </div>
       <div class="physical-actions">
         <button class="secondary" type="button" id="physicalEditBtn">Edit</button>
-        <button class="secondary" type="button" id="physicalExportBtn">Export ZIP</button>
-        <label class="secondary file-btn">Import ZIP<input id="physicalImportInput" type="file" accept=".zip,application/zip" hidden></label>
       </div>
     </section>
 
@@ -105,18 +103,33 @@
         </div>
         <button class="text-btn" id="backToSettingsFromDataBtn" type="button" onclick="showView('settings')">← Settings</button>
       </div>
-      <div class="panel settings-panel">
-        <h3>Export</h3>
-        <p class="muted">Download a JSON backup of every flight stored in this browser.</p>
-        <button class="secondary" id="exportBtn">Export JSON</button>
-        <hr>
-        <h3>Import</h3>
-        <p class="muted">Restore a previous SkyLog JSON backup. Imported flights are added to the existing logbook.</p>
-        <label class="file-btn secondary">Choose JSON backup<input id="importInput" type="file" accept=".json,application/json" hidden></label>
-        <hr>
-        <h3>Delete all data</h3>
-        <p class="muted">Permanently delete all flights stored on this device. This cannot be undone.</p>
-        <button class="danger delete-action" id="clearBtn">Delete all flights</button>
+
+      <div class="data-backup-grid">
+        <div class="panel data-backup-section">
+          <h3>Flight Data</h3>
+          <p class="muted">Export or import your SkyLog flight records as JSON.</p>
+          <div class="section-actions">
+            <button class="secondary" id="exportBtn" type="button">Export JSON</button>
+            <label class="file-btn secondary">Import JSON<input id="importInput" type="file" accept=".json,application/json" hidden></label>
+          </div>
+          <button class="danger delete-action" id="clearFlightsBtn" type="button">Delete Flight Data</button>
+        </div>
+
+        <div class="panel data-backup-section">
+          <h3>Physical Logbook</h3>
+          <p class="muted">Export or restore your scanned and photographed physical logbook pages.</p>
+          <div class="section-actions">
+            <button class="secondary" id="settingsPhysicalExportBtn" type="button">Export ZIP</button>
+            <label class="file-btn secondary">Import ZIP<input id="settingsPhysicalImportInput" type="file" accept=".zip,application/zip" hidden></label>
+          </div>
+          <button class="danger delete-action" id="clearPhysicalBtn" type="button">Delete Physical Log Book</button>
+        </div>
+
+        <div class="panel data-backup-section data-backup-danger">
+          <h3>Delete All Data</h3>
+          <p class="muted">Permanently delete both your flight data and physical logbook pages from this device. This cannot be undone.</p>
+          <button class="danger delete-action" id="clearAllDataBtn" type="button">Delete All Data</button>
+        </div>
       </div>
     </section>
 

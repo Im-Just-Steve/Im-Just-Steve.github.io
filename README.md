@@ -148,3 +148,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.58: added Physical Log Book page with image import, page navigation, edit/reorder/delete controls, IndexedDB storage, and ZIP backup/restore.
 
 - v0.59: Physical Log Book Edit uses save styling for Done, adds spacing around edit controls, and supports selecting multiple pages for deletion.
+
+- v0.60: moved physical logbook ZIP import/export to Data & backup and separated Flight Data, Physical Logbook, and Delete All Data controls.

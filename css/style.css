@@ -558,3 +558,21 @@ button.save-action:hover{
   border-color:var(--success);
   color:#fff;
 }
+
+/* v0.60: Data & backup organization */
+.data-backup-grid{
+  display:grid;
+  gap:16px;
+}
+.data-backup-section{
+  padding:20px;
+}
+.data-backup-section .section-actions{
+  margin:14px 0;
+}
+.data-backup-section > .danger{
+  margin-top:4px;
+}
+.data-backup-danger{
+  border:1px solid rgba(190,70,70,.28);
+}

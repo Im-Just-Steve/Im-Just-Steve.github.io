@@ -63,6 +63,15 @@ async function physicalDelete(id){
     r.onerror=()=>reject(r.error);
   });
 }
+async function physicalClearAll(){
+  const db=await physicalDB();
+  return new Promise((resolve,reject)=>{
+    const r=db.transaction(PHYSICAL_STORE,"readwrite").objectStore(PHYSICAL_STORE).clear();
+    r.onsuccess=()=>resolve();
+    r.onerror=()=>reject(r.error);
+  });
+}
+
 async function physicalLoad(){
   physicalPages=await physicalGetAll();
   if(physicalIndex>=physicalPages.length) physicalIndex=Math.max(0,physicalPages.length-1);
@@ -218,7 +227,6 @@ function bindPhysicalLogbook(){
     else physicalSelectedIds.add(id);
     physicalRender();
   });
-  $("#physicalExportBtn").onclick=physicalExportZip;
   physicalLoad();
 }
 
@@ -239,7 +247,30 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   $("#statsTo").addEventListener("change",renderStatistics);
   $("#exportBtn").addEventListener("click",exportData);
   $("#importInput").addEventListener("change",importData);
-  $("#clearBtn").addEventListener("click",clearData);
+  $("#clearFlightsBtn").addEventListener("click",async()=>{
+    if(confirm("Delete all flight data from this device? This cannot be undone.")){
+      await clearFlights(); await refresh(); toast("Flight data deleted");
+    }
+  });
+  $("#settingsPhysicalExportBtn").addEventListener("click",physicalExportZip);
+  $("#settingsPhysicalImportInput").addEventListener("change",async e=>{
+    const file=e.target.files[0];
+    if(file) await physicalImportZip(file);
+    e.target.value="";
+  });
+  $("#clearPhysicalBtn").addEventListener("click",async()=>{
+    if(confirm("Delete the entire physical log book from this device? This cannot be undone.")){
+      await physicalClearAll(); physicalPages=[]; physicalIndex=0; physicalSelectedIds.clear();
+      await physicalRender(); toast("Physical log book deleted");
+    }
+  });
+  $("#clearAllDataBtn").addEventListener("click",async()=>{
+    if(confirm("Delete ALL flight data and the entire physical log book from this device? This cannot be undone.")){
+      await clearFlights(); await physicalClearAll();
+      flights=[]; physicalPages=[]; physicalIndex=0; physicalSelectedIds.clear();
+      await refresh(); await physicalRender(); toast("All data deleted");
+    }
+  });
   $("#updateBtn").addEventListener("click",checkForUpdate);
   $("#addClassBtn")?.addEventListener("click",addAircraftClass);
   $("#newClassName")?.addEventListener("keydown",e=>{if(e.key==="Enter")addAircraftClass();});
