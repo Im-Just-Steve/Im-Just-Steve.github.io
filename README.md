@@ -162,3 +162,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.66: Phase 1 physical logbook import workflow with camera/file capture, four-corner perspective crop/straightening, rotation, corrected preview, and optional save to Physical Log Book.
 
 - v0.67: Phase 1 scan editor now processes one page at a time, removes Choose another page, fills the viewer with the image, and starts crop handles at the image corners.
+
+- v0.68: corrected Phase 1 perspective warping to remove blank regions from saved pages, and reset the importer after adding a corrected page so the captured source is released and the first import step is shown again.

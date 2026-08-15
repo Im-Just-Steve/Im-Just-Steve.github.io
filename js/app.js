@@ -335,26 +335,62 @@ function scanCorrectedCanvas(){
   const left=Math.hypot(bl.x-tl.x,bl.y-tl.y),right=Math.hypot(br.x-tr.x,br.y-tr.y);
   const ratio=Math.max(.35,Math.min(3,(top+bottom)/(left+right)));
   const maxSide=1800;
-  let outW=1200,outH=Math.round(outW/ratio);
+  let outW=1600,outH=Math.round(outW/ratio);
   if(outH>maxSide){outH=maxSide;outW=Math.round(outH*ratio);}
-  outW=Math.max(600,outW);outH=Math.max(400,outH);
-  const h=homography(scanCorners,outW,outH);if(!h)return null;
+  outW=Math.max(800,outW);outH=Math.max(500,outH);
+
+  // homography() maps the four source corners to the rectangular destination.
+  // For each destination pixel we need the inverse transform back into the source.
+  const H=homography(scanCorners,outW,outH);
+  if(!H)return null;
+  const [a,b,c,d,e,f,g,h]=H;
+  const inv=solve8(
+    [
+      [a,d,g,0,0,0,0,0],
+      [b,e,h,0,0,0,0,0],
+      [c,f,1,0,0,0,0,0],
+      [0,0,0,a,d,g,0,0],
+      [0,0,0,b,e,h,0,0],
+      [0,0,0,c,f,1,0,0],
+      [0,0,0,0,0,0,a,d,g],
+      [0,0,0,0,0,0,b,e,h]
+    ],
+    [1,0,0,0,1,0,0,1]
+  );
+
+  // The compact 3x3 inverse is calculated explicitly for numerical stability.
+  const det=a*(e-f*h)-b*(d-f*g)+c*(d*h-e*g);
+  if(Math.abs(det)<1e-10)return null;
+  const ia=(e-f*h)/det, ib=(c*h-b)/det, ic=(b*f-c*e)/det;
+  const id=(f*g-d*h)/det, ie=(a*h-c*g)/det, iff=(c*d-a*f)/det;
+  const ig=(d*h-e*g)/det, ih=(b*d-a*h)/det, ii=(a*e-b*d)/det;
+
   const out=document.createElement("canvas");out.width=outW;out.height=outH;
-  const octx=out.getContext("2d"),src=scanImage;
-  const data=octx.createImageData(outW,outH),d=data.data;
-  const s=src.naturalWidth,sh=src.naturalHeight;
-  const tmp=document.createElement("canvas");tmp.width=s;tmp.height=sh;
-  const tctx=tmp.getContext("2d");tctx.drawImage(src,0,0);
-  const sd=tctx.getImageData(0,0,s,sh).data;
-  const [a,b,c,d0,e,f,g,h0]=h;
-  for(let y=0;y<outH;y++)for(let x=0;x<outW;x++){
-    const den=g*x+h0*y+1;
-    const sx=(a*x+b*y+c)/den,sy=(d0*x+e*y+f)/den;
-    const ix=Math.round(sx),iy=Math.round(sy),di=(y*outW+x)*4;
-    if(ix>=0&&ix<s&&iy>=0&&iy<sh){const si=(iy*s+ix)*4;d[di]=sd[si];d[di+1]=sd[si+1];d[di+2]=sd[si+2];d[di+3]=255;}
+  const octx=out.getContext("2d");
+  const src=document.createElement("canvas");
+  src.width=scanImage.naturalWidth;src.height=scanImage.naturalHeight;
+  const sctx=src.getContext("2d");
+  sctx.drawImage(scanImage,0,0);
+  const sw=src.width,sh=src.height,sd=sctx.getImageData(0,0,sw,sh).data;
+  const data=octx.createImageData(outW,outH),dta=data.data;
+
+  for(let y=0;y<outH;y++){
+    for(let x=0;x<outW;x++){
+      const den=ig*x+ih*y+ii;
+      if(Math.abs(den)<1e-10)continue;
+      const sx=(ia*x+ib*y+ic)/den;
+      const sy=(id*x+ie*y+iff)/den;
+      const ix=Math.round(sx),iy=Math.round(sy);
+      if(ix>=0&&ix<sw&&iy>=0&&iy<sh){
+        const si=(iy*sw+ix)*4,di=(y*outW+x)*4;
+        dta[di]=sd[si];dta[di+1]=sd[si+1];dta[di+2]=sd[si+2];dta[di+3]=255;
+      }
+    }
   }
-  octx.putImageData(data,0,0);return out;
+  octx.putImageData(data,0,0);
+  return out;
 }
+
 function scanUpdatePreview(){
   const out=scanCorrectedCanvas(),p=$("#scanPreviewCanvas");
   if(!out||!p)return;
@@ -365,9 +401,24 @@ function scanUpdatePreview(){
 async function scanAddToPhysical(){
   const out=scanCorrectedCanvas();if(!out)return;
   const blob=await new Promise(r=>out.toBlob(r,"image/jpeg",.94));
-  const page=physicalFileToPage(new File([blob],"physical-logbook-page.jpg",{type:"image/jpeg"}),physicalPages.length);
-  await physicalPut(page);await physicalLoad();toast("Corrected page added to Physical Log Book");
-  showView("physicalLogbook");
+  const page=physicalFileToPage(
+    new File([blob],"physical-logbook-page.jpg",{type:"image/jpeg"}),
+    physicalPages.length
+  );
+  await physicalPut(page);
+  await physicalLoad();
+
+  // The captured source image is temporary. Release it and return the
+  // importer to its first page so the next scan starts completely fresh.
+  if(scanImage)scanImage=null;
+  scanSourceFile=null;
+  scanCorners=[];
+  scanRotation=0;
+  const input=$("#scanLogbookInput");
+  if(input)input.value="";
+  $("#scanEditorPanel").classList.add("hidden");
+  $("#scanSourcePanel").classList.remove("hidden");
+  toast("Corrected page added to Physical Log Book");
 }
 function bindScanLogbook(){
   $("#scanLogbookInput").addEventListener("change",e=>{
