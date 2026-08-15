@@ -584,3 +584,6 @@ button.save-action:hover{
   position:relative;
   z-index:5;
 }
+
+/* v0.62: Edit controls */
+#physicalLogbook #physicalEditBtn.hidden{display:none}

@@ -152,3 +152,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.60: moved physical logbook ZIP import/export to Data & backup and separated Flight Data, Physical Logbook, and Delete All Data controls.
 
 - v0.61: fixed Physical Log Book and Data & backup initialization after moving ZIP controls to Settings; restored viewer/edit/navigation/delete controls and robust ZIP import errors.
+
+- v0.62: placed Done before Move left in Physical Log Book editing and fixed deletion of the current page when no page is selected.
