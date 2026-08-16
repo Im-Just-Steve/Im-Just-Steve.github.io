@@ -848,3 +848,5 @@ button.save-action:hover{
   width:160px !important;
   height:160px !important;
 }
+
+#scanMagnifier{display:none !important}

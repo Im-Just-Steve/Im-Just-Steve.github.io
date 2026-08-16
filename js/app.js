@@ -558,75 +558,91 @@ function scanAnalysePage(){
 
 
 let scanMagnifierSourceCanvas=null;
+let scanIOSMagnifierEl=null;
+let scanIOSMagnifierCanvas=null;
 
-function scanEnsureMagnifierSource(){
+function scanEnsureMagnifierSourceCanvas(){
   if(!scanImage)return null;
   const w=scanImage.naturalWidth,h=scanImage.naturalHeight;
-  if(!scanMagnifierSourceCanvas ||
-     scanMagnifierSourceCanvas.width!==w ||
-     scanMagnifierSourceCanvas.height!==h){
+  if(!scanMagnifierSourceCanvas || scanMagnifierSourceCanvas.width!==w || scanMagnifierSourceCanvas.height!==h){
     scanMagnifierSourceCanvas=document.createElement("canvas");
     scanMagnifierSourceCanvas.width=w;
     scanMagnifierSourceCanvas.height=h;
-    const ctx=scanMagnifierSourceCanvas.getContext("2d");
-    ctx.drawImage(scanImage,0,0);
+    scanMagnifierSourceCanvas.getContext("2d").drawImage(scanImage,0,0);
   }
   return scanMagnifierSourceCanvas;
 }
 
+function scanCreateIOSMagnifier(){
+  if(scanIOSMagnifierEl)return;
+  const el=document.createElement("div");
+  el.id="scanIOSMagnifier";
+  el.setAttribute("aria-hidden","true");
+  Object.assign(el.style,{
+    position:"fixed",display:"block",visibility:"visible",opacity:"1",
+    left:"8px",top:"8px",width:"170px",height:"170px",
+    borderRadius:"50%",overflow:"hidden",background:"#111",
+    border:"3px solid #fff",boxShadow:"0 5px 22px rgba(0,0,0,.65)",
+    zIndex:"2147483647",pointerEvents:"none",
+    WebkitTransform:"translateZ(0)",transform:"translateZ(0)"
+  });
+  const canvas=document.createElement("canvas");
+  canvas.width=170;canvas.height=170;
+  Object.assign(canvas.style,{display:"block",width:"170px",height:"170px"});
+  el.appendChild(canvas);
+  document.body.appendChild(el);
+  scanIOSMagnifierEl=el;
+  scanIOSMagnifierCanvas=canvas;
+}
+
 function scanUpdateMagnifier(point){
-  const mag=$("#scanMagnifier"),canvas=$("#scanMagnifierCanvas");
-  if(!mag||!canvas||!scanImage||scanDragIndex<0)return;
-
-  const rect=$("#scanCanvas").getBoundingClientRect();
-  const clientX=point.clientX,clientY=point.clientY;
-  const x=clientX-rect.left,y=clientY-rect.top;
-  if(x<0||x>rect.width||y<0||y>rect.height)return;
-
+  if(!scanImage||scanDragIndex<0)return;
   const source=scanEnsureMagnifierSourceCanvas();
   if(!source)return;
+  scanCreateIOSMagnifier();
+  const rect=$("#scanCanvas").getBoundingClientRect();
+  const x=point.clientX-rect.left,y=point.clientY-rect.top;
+  if(x<0||x>rect.width||y<0||y>rect.height)return;
 
-  // Keep the magnifier above the finger whenever possible. Fixed positioning
-  // avoids iOS Safari clipping/transform quirks inside the viewer.
-  const size=160;
-  const gap=22;
-  let left=clientX-size/2;
-  let top=clientY-size-gap;
-  if(top<8)top=clientY+gap;
-  left=scanClamp(left,8,window.innerWidth-size-8);
-  top=scanClamp(top,8,window.innerHeight-size-8);
+  const size=170,margin=16;
+  let left=point.clientX-size/2,top=point.clientY-size-22;
+  if(top<margin)top=point.clientY+22;
+  left=scanClamp(left,margin,Math.max(margin,window.innerWidth-size-margin));
+  top=scanClamp(top,margin,Math.max(margin,window.innerHeight-size-margin));
 
-  mag.style.position="fixed";
-  mag.style.left=`${left}px`;
-  mag.style.top=`${top}px`;
-  mag.style.width=`${size}px`;
-  mag.style.height=`${size}px`;
-  mag.classList.remove("hidden");
+  scanIOSMagnifierEl.style.left=Math.round(left)+"px";
+  scanIOSMagnifierEl.style.top=Math.round(top)+"px";
+  scanIOSMagnifierEl.style.display="block";
+  scanIOSMagnifierEl.style.visibility="visible";
+  scanIOSMagnifierEl.style.opacity="1";
 
-  const ctx=canvas.getContext("2d");
-  const sx=x*(source.width/rect.width);
-  const sy=y*(source.height/rect.height);
-  const sourceSize=Math.max(60,Math.min(source.width,source.height)/9);
-
+  const sx=x*(source.width/rect.width),sy=y*(source.height/rect.height);
+  const sourceSize=Math.max(50,Math.min(source.width,source.height)/10);
+  const ctx=scanIOSMagnifierCanvas.getContext("2d");
   ctx.clearRect(0,0,size,size);
-  ctx.fillStyle="#111";
-  ctx.fillRect(0,0,size,size);
-  ctx.drawImage(
-    source,
-    sx-sourceSize/2,sy-sourceSize/2,sourceSize,sourceSize,
-    0,0,size,size
-  );
+  ctx.drawImage(source,sx-sourceSize/2,sy-sourceSize/2,sourceSize,sourceSize,0,0,size,size);
+  ctx.strokeStyle="rgba(255,255,255,.95)";
+  ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.arc(size/2,size/2,10,0,Math.PI*2);
+  ctx.moveTo(size/2-17,size/2);ctx.lineTo(size/2+17,size/2);
+  ctx.moveTo(size/2,size/2-17);ctx.lineTo(size/2,size/2+17);
+  ctx.stroke();
 }
+
 function scanHideMagnifier(){
-  const mag=$("#scanMagnifier");
-  if(mag)mag.classList.add("hidden");
+  scanDragIndex=-1;
+  if(scanIOSMagnifierEl){
+    scanIOSMagnifierEl.style.display="none";
+    scanIOSMagnifierEl.style.visibility="hidden";
+  }
 }
 
 function bindScanLogbook(){
   $("#scanLogbookInput").addEventListener("change",e=>{
     const file=e.target.files?.[0];e.target.value="";if(!file)return;
     const url=URL.createObjectURL(file),img=new Image();
-    img.onload=()=>{URL.revokeObjectURL(url);scanImage=img;scanSourceFile=file;scanRotation=0;scanMagnifierSourceCanvas=null;scanResetCorners();
+    img.onload=()=>{URL.revokeObjectURL(url);scanImage=img;scanSourceFile=file;scanRotation=0;scanMagnifierSourceCanvas=null;scanMagnifierSourceCanvas=null;scanResetCorners();
       $("#scanSourcePanel").classList.add("hidden");$("#scanEditorPanel").classList.remove("hidden");scanDraw();};
     img.src=url;
   });

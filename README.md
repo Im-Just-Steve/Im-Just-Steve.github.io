@@ -180,3 +180,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.75: moved initial crop handles further toward the centre on both axes and restored their previous size.
 
 - v0.76: rebuilt the Phase 1 precision magnifier for iOS/iPadOS using a fixed-position overlay, cached source canvas, and touch-safe rendering.
+
+- v0.77: rebuilt the precision magnifier as a document-level fixed overlay with its own canvas for iOS/iPadOS compatibility.
