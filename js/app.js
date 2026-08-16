@@ -545,6 +545,106 @@ function scanStructureDraw(){
     `${POOLEYS_TEMPLATE.rows} flight rows identified, with the main entry fields mapped on both sides of the Pooleys spread.`;
 }
 
+
+const SCAN_CELL_FIELDS=[
+  ...POOLEYS_TEMPLATE.left.fields.map(([label,x1,x2])=>({label,side:"left",x1,x2})),
+  ...POOLEYS_TEMPLATE.right.fields.map(([label,x1,x2])=>({label,side:"right",x1,x2}))
+];
+
+function scanGetCorrectedSource(){
+  return scanCorrectedCanvas();
+}
+
+function scanCropCell(source,rowIndex,field){
+  const pageW=source.width,pageH=source.height;
+  const template=field.side==="left"?POOLEYS_TEMPLATE.left:POOLEYS_TEMPLATE.right;
+  const rowCount=POOLEYS_TEMPLATE.rows;
+  const rowY=template.y+(template.h/rowCount)*rowIndex;
+  const rowH=template.h/rowCount;
+  const x=template.x+template.w*field.x1;
+  const y=rowY;
+  const w=template.w*(field.x2-field.x1);
+  const h=rowH;
+
+  const padX=Math.max(4,w*0.025),padY=Math.max(4,h*0.08);
+  const sx=Math.max(0,Math.round((x-padX)*pageW));
+  const sy=Math.max(0,Math.round((y-padY)*pageH));
+  const ex=Math.min(pageW,Math.round((x+w+padX)*pageW));
+  const ey=Math.min(pageH,Math.round((y+h+padY)*pageH));
+  const cw=Math.max(1,ex-sx),ch=Math.max(1,ey-sy);
+
+  const out=document.createElement("canvas");
+  // Keep a useful enlarged preview while avoiding enormous canvases.
+  const scale=Math.min(4,Math.max(1,900/cw));
+  out.width=Math.round(cw*scale);
+  out.height=Math.round(ch*scale);
+  const ctx=out.getContext("2d");
+  ctx.fillStyle="#fff";
+  ctx.fillRect(0,0,out.width,out.height);
+  ctx.drawImage(source,sx,sy,cw,ch,0,0,out.width,out.height);
+  return out;
+}
+
+function scanRenderCellInspector(){
+  const panel=$("#scanCellInspector");
+  const grid=$("#scanCellGrid");
+  const selector=$("#scanRowSelector");
+  if(!panel||!grid||!selector||!scanImage)return;
+
+  panel.classList.remove("hidden");
+  selector.innerHTML="";
+  for(let i=0;i<POOLEYS_TEMPLATE.rows;i++){
+    const b=document.createElement("button");
+    b.type="button";
+    b.className=`stats-range-btn${i===scanSelectedRow?" active":""}`;
+    b.textContent=`Flight ${i+1}`;
+    b.dataset.row=i;
+    b.onclick=()=>{
+      scanSelectedRow=i;
+      scanRenderCellInspector();
+    };
+    selector.appendChild(b);
+  }
+
+  $("#scanInspectorStatus").textContent=`Flight ${scanSelectedRow+1}`;
+  grid.innerHTML="";
+  const source=scanGetCorrectedSource();
+  if(!source)return;
+
+  for(const field of SCAN_CELL_FIELDS){
+    const card=document.createElement("article");
+    card.className="scan-cell-card";
+    const title=document.createElement("div");
+    title.className="scan-cell-title";
+    title.textContent=field.label;
+    const meta=document.createElement("span");
+    meta.textContent=field.side==="left"?"Flight details":"Flight record";
+    title.appendChild(meta);
+
+    const viewport=document.createElement("div");
+    viewport.className="scan-cell-viewport";
+    const crop=scanCropCell(source,scanSelectedRow,field);
+    crop.className="scan-cell-canvas";
+    viewport.appendChild(crop);
+
+    card.append(title,viewport);
+    grid.appendChild(card);
+  }
+}
+
+function scanAnalysePage(){
+  if(!scanImage){
+    alert("Choose a physical log book page first.");
+    return;
+  }
+  $("#scanStructurePanel").classList.remove("hidden");
+  $("#scanAnalyseBtn").textContent="Pooleys Page Analysed";
+  $("#scanAnalyseBtn").classList.add("save-action");
+  scanSelectedRow=0;
+  scanStructureDraw();
+  scanRenderCellInspector();
+}
+
 function scanAnalysePage(){
   if(!scanImage){
     alert("Choose a physical log book page first.");
@@ -557,6 +657,7 @@ function scanAnalysePage(){
 }
 
 
+let scanSelectedRow=0;
 let scanMagnifierSourceCanvas=null;
 let scanIOSMagnifierEl=null;
 let scanIOSMagnifierCanvas=null;
@@ -649,12 +750,14 @@ function bindScanLogbook(){
   $("#scanResetBtn").onclick=()=>{
     scanResetCorners();
     $("#scanStructurePanel").classList.add("hidden");
+    $("#scanCellInspector").classList.add("hidden");
     $("#scanAnalyseBtn").textContent="Analyse Pooleys Page";
     $("#scanAnalyseBtn").classList.remove("save-action");
     scanDraw();
   };
   $("#scanRotateBtn").onclick=()=>{
     $("#scanStructurePanel").classList.add("hidden");
+    $("#scanCellInspector").classList.add("hidden");
     $("#scanAnalyseBtn").textContent="Analyse Pooleys Page";
     $("#scanAnalyseBtn").classList.remove("save-action");
     scanRotateSource();
@@ -721,7 +824,10 @@ function bindScanLogbook(){
   window.addEventListener("resize",()=>{
     if(scanImage){
       scanDraw();
-      if(!$("#scanStructurePanel").classList.contains("hidden"))scanStructureDraw();
+      if(!$("#scanStructurePanel").classList.contains("hidden")){
+        scanStructureDraw();
+        scanRenderCellInspector();
+      }
     }
   });
 }

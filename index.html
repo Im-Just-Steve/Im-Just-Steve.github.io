@@ -173,7 +173,19 @@
             <span><i class="scan-key scan-key-column"></i>Detected fields</span>
           </div>
           <p class="muted scan-phase-note">No flight data is created in Phase 2. This step only identifies the rows and fields that Phase 3 will read.</p>
-        </div>
+
+          <div class="scan-cell-inspector hidden" id="scanCellInspector">
+            <div class="scan-inspector-head">
+              <div>
+                <p class="eyebrow">PHASE 3A · CELL INSPECTION</p>
+                <h3>Inspect handwritten cells</h3>
+                <p class="muted">Select a flight row to see each detected cell enlarged. Nothing is read or imported yet.</p>
+              </div>
+              <span class="scan-detection-badge" id="scanInspectorStatus">Row 1</span>
+            </div>
+            <div class="scan-row-selector" id="scanRowSelector"></div>
+            <div class="scan-cell-grid" id="scanCellGrid"></div>
+          </div>
 
         <div class="scan-editor-actions">
           <button class="primary add-action" type="button" id="scanAddPhysicalBtn">Add to Physical Log Book</button>

@@ -850,3 +850,69 @@ button.save-action:hover{
 }
 
 #scanMagnifier{display:none !important}
+
+/* v0.79: Phase 3A cell inspection */
+.scan-cell-inspector{
+  margin-top:18px;
+  padding-top:18px;
+  border-top:1px solid var(--border);
+}
+.scan-inspector-head{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  align-items:flex-start;
+}
+.scan-row-selector{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:16px 0;
+}
+.scan-row-selector button{
+  min-width:82px;
+}
+.scan-cell-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.scan-cell-card{
+  min-width:0;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--surface);
+  overflow:hidden;
+}
+.scan-cell-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  padding:9px 11px;
+  font-weight:700;
+  font-size:.9rem;
+}
+.scan-cell-title span{
+  font-size:.7rem;
+  font-weight:500;
+  opacity:.65;
+}
+.scan-cell-viewport{
+  min-height:105px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:auto;
+}
+.scan-cell-canvas{
+  display:block;
+  width:100%;
+  height:auto;
+  image-rendering:auto;
+}
+@media(max-width:700px){
+  .scan-cell-grid{grid-template-columns:1fr}
+  .scan-inspector-head{display:block}
+}
