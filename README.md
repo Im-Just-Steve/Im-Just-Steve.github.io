@@ -182,3 +182,5 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.76: rebuilt the Phase 1 precision magnifier for iOS/iPadOS using a fixed-position overlay, cached source canvas, and touch-safe rendering.
 
 - v0.77: rebuilt the precision magnifier as a document-level fixed overlay with its own canvas for iOS/iPadOS compatibility.
+
+- v0.78: hardened JSON flight-data import, including UTF-8 BOM tolerance, multiple legacy wrapper formats, validation before writing, detailed errors, and a guarantee that import never clears existing flight data.

@@ -1219,14 +1219,46 @@ async function exportData(){
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`skylog-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);
 }
 async function importData(e){
-  const file=e.target.files[0];if(!file)return;
+  const file=e.target.files[0];
+  if(!file)return;
+
   try{
-    const data=JSON.parse(await file.text()), list=Array.isArray(data)?data:data.flights;
-    if(!Array.isArray(list)) throw Error();
-    for(const f of list){ if(f.id) await putFlight(f); }
-    await refresh();toast(`${list.length} flights imported`);
-  }catch{alert("That file is not a valid SkyLog backup.")}
-  e.target.value="";
+    // Read as text and tolerate a UTF-8 BOM, which can be present in JSON
+    // files created/exported by some desktop tools.
+    let text=await file.text();
+    text=text.replace(/^\\uFEFF/,"").trim();
+    if(!text)throw new Error("The file is empty.");
+
+    const data=JSON.parse(text);
+
+    // Accept the current SkyLog format, the older plain-array format, and
+    // a couple of harmless wrapper names used by earlier test backups.
+    let list;
+    if(Array.isArray(data)) list=data;
+    else if(data && Array.isArray(data.flights)) list=data.flights;
+    else if(data && Array.isArray(data.data)) list=data.data;
+    else if(data && Array.isArray(data.records)) list=data.records;
+    else throw new Error("No flight records were found.");
+
+    // Never delete existing data during an import. Validate the records first
+    // so a bad backup cannot leave the user's logbook empty or partially changed.
+    const valid=list.filter(f=>f && typeof f==="object" && f.id!=null && String(f.id).trim()!=="");
+    if(!valid.length)throw new Error("The backup contains no valid flight records.");
+
+    let imported=0;
+    for(const flight of valid){
+      await putFlight(flight);
+      imported++;
+    }
+
+    await refresh();
+    toast(`${imported} flight${imported===1?"":"s"} imported`);
+  }catch(err){
+    console.error("SkyLog JSON import failed",err);
+    alert(`Could not import this SkyLog backup. ${err.message||"The file is invalid or unsupported."}`);
+  }finally{
+    e.target.value="";
+  }
 }
 async function clearData(){
   if(confirm("Delete every flight from this device? This cannot be undone.")){await clearFlights();await refresh();toast("Logbook cleared")}
