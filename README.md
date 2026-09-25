@@ -186,3 +186,19 @@ This is an MVP data model; adapt fields and calculations to your preferred aviat
 - v0.78: hardened JSON flight-data import, including UTF-8 BOM tolerance, multiple legacy wrapper formats, validation before writing, detailed errors, and a guarantee that import never clears existing flight data.
 
 - v0.79: Phase 3A cell inspection lets users select a detected flight row and view each mapped cell as an enlarged image; no OCR or flight-data import is performed.
+
+- v0.80: reorganised the JavaScript into feature-focused files and added a code-organisation guide. Behaviour, UI, data structures and offline architecture are unchanged.
+
+## Code organisation
+
+The application is intentionally kept as plain browser JavaScript so it remains easy to inspect and continues to work as an offline PWA. Feature code is separated into small classic-script modules loaded in dependency order from `index.html`:
+
+- `js/db.js` — IndexedDB for flight data and aircraft classes.
+- `js/physical-logbook.js` — physical log book storage, viewer, reordering, deletion and ZIP backup.
+- `js/scan-logbook.js` — physical-page import, crop/perspective correction, Pooleys analysis and cell inspection.
+- `js/app.js` — shared application state, navigation, flight entry, logbook rendering, statistics and JSON backup/import.
+- `js/aircraft-classes.js` — aircraft-class management UI.
+- `js/updates.js` — service-worker update/install handling.
+- `js/app-init.js` — DOM startup and event wiring; loaded last.
+
+The split is organisational only: the app still uses the same global browser functions and existing HTML controls, so the UI and data model are unchanged.

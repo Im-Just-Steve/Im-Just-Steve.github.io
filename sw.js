@@ -1,5 +1,5 @@
-const CACHE="skylog-v049-alpha";
-const ASSETS=["./","./index.html","./css/style.css","./js/db.js","./js/app.js","./manifest.json","./version.json"];
+const CACHE="skylog-v050-alpha";
+const ASSETS=["./","./index.html","./css/style.css","./js/db.js","./js/physical-logbook.js","./js/scan-logbook.js","./js/app.js","./js/aircraft-classes.js","./js/updates.js","./js/app-init.js","./manifest.json","./version.json"];
 
 self.addEventListener("install",e=>{
   e.waitUntil(
